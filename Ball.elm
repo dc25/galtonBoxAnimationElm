@@ -9,7 +9,7 @@ import Effects exposing (Effects)
 import Html exposing (Html, fromElement)
 
 interval : Time
-interval = 500
+interval = 100
 
 scale : Float
 scale = 10
@@ -26,10 +26,11 @@ type alias Model =
   }
 
 init : Model
-init = { level = 0
-       , shift = 0
-       , seed = initialSeed 34342
-       }
+init = 
+  { level = 0
+  , shift = 0
+  , seed = initialSeed 34342
+  }
 
 view : Signal.Address Action -> Model -> Html
 view _ model = 
@@ -37,11 +38,12 @@ view _ model =
     in collage 700 500 [ circle 8 |> filled blue |> move position ]
        |> fromElement
 
-
-
 update : Action -> Model -> (Model, Effects Action)
 update _ model = let 
                    deltaShift = map (\b -> if b then 1 else -1) bool
                    (delta, seed) = generate deltaShift model.seed
-               in ({ level=(model.level)+1, shift = model.shift+delta, seed=seed}, Effects.none)
+               in ( { level=(model.level)+1
+                    , shift = model.shift+delta
+                    , seed=seed}
+                  , Effects.none)
 
