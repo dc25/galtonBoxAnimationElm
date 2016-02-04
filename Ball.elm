@@ -16,31 +16,23 @@ scale = 10
 
 type Action = Step
 
-tick : Signal Action 
-tick = Signal.map (\_ -> Step) (every interval)
-
 type alias Model = 
   { level : Int
   , shift : Int
   , seed : Seed
   }
 
-init : Model
-init = 
+init : Time -> Model 
+init t = 
   { level = 0
   , shift = 0
-  , seed = initialSeed 34342
+  , seed = initialSeed (truncate t)
   }
 
 viewAsForm : Model -> Form
 viewAsForm model = 
-  let position = (scale * toFloat (model.shift), -scale * toFloat (model.level))
+  let position = (scale * toFloat (model.shift), 450-scale * toFloat (model.level))
   in circle 8 |> filled blue |> move position 
-
-view : Signal.Address Action -> Model -> Html
-view action model = 
-  collage 700 500 [ viewAsForm model ]
-  |> fromElement
 
 update : Action -> Model -> (Model, Effects Action)
 update _ model = let 

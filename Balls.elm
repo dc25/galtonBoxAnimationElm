@@ -1,41 +1,48 @@
 module Balls where
 
-import Ball exposing (init, viewAsForm)
+import Time exposing (Time, every)
+import Effects exposing (Effects)
+import Graphics.Collage exposing (collage)
+import Ball exposing (init, update, viewAsForm)
+import Html exposing (Html, fromElement)
 
-interval : Time
-interval = 1000
+dropInterval : Time
+dropInterval = 100
 
-type alias Model = {
-  balls : List Ball.Model
-}
+stepInterval : Time
+stepInterval = 100
+
+type alias Model = 
+  { balls : List Ball.Model
+  }
 
 init : Model
 init =
   { balls = []
   }
 
-type Action = Drop, Step
+type Action = Drop Time | Step
 
-release : Signal Action 
-release = Signal.map (\_ -> Drop) (every interval)
+drop : Signal Action 
+drop = Signal.map (\t -> Drop t) (every dropInterval)
 
 tick : Signal Action 
-tick = Signal.map (\_ -> Step) (every interval)
+tick = Signal.map (\_ -> Step) (every stepInterval)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
   case action of
-    Drop -> 
-      let updatedBalls = Ball.init :: model.balls
-      in { balls = updatedBalls }
+    Drop t -> 
+      let updatedBalls = Ball.init t :: model.balls
+      in ({ balls = updatedBalls }, Effects.none)
     Step -> 
-      let updatedBalls = List.map (fst.(Ball.update Ball.Step)) model.balls
-      in { balls = updatedBalls }
+      let updatedBalls = List.map (fst << (Ball.update Ball.Step)) model.balls
+      in ({ balls = updatedBalls }, Effects.none)
 
 
 view : Signal.Address Action -> Model -> Html
 view action model = 
-  collage 700 500 (List.map Ball.viewAsForm model.balls)
+  collage 700 1000 (List.map Ball.viewAsForm model.balls)
   |> fromElement
 
 

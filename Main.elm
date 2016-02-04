@@ -1,4 +1,4 @@
-import Ball exposing (Model, init, update, view, tick)
+import Balls exposing (Model, init, update, view, tick, drop)
 import StartApp exposing (..)
 import Effects exposing (Effects)
 import Html exposing (Html)
@@ -8,7 +8,7 @@ app = StartApp.start
   { init = (init, Effects.none)
   , update = update
   , view = view
-  , inputs = [ tick ]
+  , inputs = [ drop, tick ]
   }
 
 main : Signal Html
