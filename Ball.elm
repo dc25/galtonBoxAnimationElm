@@ -35,11 +35,11 @@ viewAsForm model =
   in circle 8 |> filled blue |> move position 
 
 update : Action -> Model -> (Model, Effects Action)
-update _ model = let 
-                   deltaShift = map (\b -> if b then 1 else -1) bool
-                   (delta, seed) = generate deltaShift model.seed
-               in ( { level=(model.level)+1
-                    , shift = model.shift+delta
-                    , seed=seed}
-                  , Effects.none)
+update _ model = 
+  let deltaShift = map (\b -> if b then 1 else -1) bool
+      (delta, seed) = generate deltaShift model.seed
+  in ( { level=(model.level)+1
+       , shift = model.shift+delta
+       , seed=seed}
+     , Effects.none)
 
