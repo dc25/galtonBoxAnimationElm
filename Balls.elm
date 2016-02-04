@@ -5,12 +5,7 @@ import Effects exposing (Effects)
 import Graphics.Collage exposing (collage)
 import Ball exposing (init, update, viewAsForm)
 import Html exposing (Html, fromElement)
-
-dropInterval : Time
-dropInterval = 100
-
-stepInterval : Time
-stepInterval = 50
+import Config
 
 type alias Model = 
   { balls : List Ball.Model
@@ -24,10 +19,10 @@ init =
 type Action = Drop Time | Step
 
 drop : Signal Action 
-drop = Signal.map (\t -> Drop t) (every dropInterval)
+drop = Signal.map (\t -> Drop t) (every Config.dropInterval)
 
 tick : Signal Action 
-tick = Signal.map (\_ -> Step) (every stepInterval)
+tick = Signal.map (\_ -> Step) (every Config.stepInterval)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
@@ -42,7 +37,7 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view action model = 
-  collage 700 1000 (List.map Ball.viewAsForm model.balls)
+  collage Config.width Config.height (List.map Ball.viewAsForm model.balls)
   |> fromElement
 
 
