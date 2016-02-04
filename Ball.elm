@@ -1,15 +1,11 @@
 module Ball where
 
-import Color exposing (..)
-import Graphics.Collage exposing (..)
-import Graphics.Element exposing (..)
-import Time exposing (..)
-import Random exposing (..)
+import Color exposing (blue)
+import Graphics.Collage exposing (filled, move, Form, circle)
+import Time exposing (Time)
+import Random exposing (Seed, bool, generate, initialSeed, map)
 import Effects exposing (Effects)
 import Html exposing (Html, fromElement)
-
-interval : Time
-interval = 100
 
 scale : Float
 scale = 10
@@ -32,7 +28,7 @@ init t =
 viewAsForm : Model -> Form
 viewAsForm model = 
   let position = (scale * toFloat (model.shift), 450-scale * toFloat (model.level))
-  in circle 8 |> filled blue |> move position 
+  in circle 3 |> filled blue |> move position 
 
 update : Action -> Model -> (Model, Effects Action)
 update _ model = 

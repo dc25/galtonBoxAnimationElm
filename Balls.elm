@@ -10,7 +10,7 @@ dropInterval : Time
 dropInterval = 100
 
 stepInterval : Time
-stepInterval = 100
+stepInterval = 50
 
 type alias Model = 
   { balls : List Ball.Model
