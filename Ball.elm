@@ -5,13 +5,19 @@ import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
 import Time exposing (..)
 import Random exposing (..)
+import Effects exposing (Effects)
 import Html exposing (Html, fromElement)
 
-dt : Float
-dt = 0.1
+interval : Time
+interval = 500
 
 scale : Float
 scale = 10
+
+type Action = Step
+
+tick : Signal Action 
+tick = Signal.map (\_ -> Step) (every interval)
 
 type alias Model = 
   { level : Int
@@ -32,11 +38,10 @@ view _ model =
        |> fromElement
 
 
-type Action = Step
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Effects Action)
 update _ model = let 
                    deltaShift = map (\b -> if b then 1 else -1) bool
                    (delta, seed) = generate deltaShift model.seed
-               in { level=(model.level)+1, shift = model.shift+delta, seed=seed}
+               in ({ level=(model.level)+1, shift = model.shift+delta, seed=seed}, Effects.none)
 

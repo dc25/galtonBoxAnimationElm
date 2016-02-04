@@ -1,9 +1,15 @@
-import Ball exposing (init, update, view)
-import StartApp.Simple exposing (start)
+import Ball exposing (Model, init, update, view, tick)
+import StartApp exposing (..)
+import Effects exposing (Effects)
+import Html exposing (Html)
 
-main =
-  start
-    { model = init
-    , update = update
-    , view = view
-    }
+app : StartApp.App Model
+app = StartApp.start 
+  { init = (init, Effects.none)
+  , update = update
+  , view = view
+  , inputs = [ tick ]
+  }
+
+main : Signal Html
+main = app.html
