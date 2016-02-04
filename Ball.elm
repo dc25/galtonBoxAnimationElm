@@ -32,11 +32,15 @@ init =
   , seed = initialSeed 34342
   }
 
+viewAsForm : Model -> Form
+viewAsForm model = 
+  let position = (scale * toFloat (model.shift), -scale * toFloat (model.level))
+  in circle 8 |> filled blue |> move position 
+
 view : Signal.Address Action -> Model -> Html
-view _ model = 
-    let position = (scale * toFloat (model.shift), -scale * toFloat (model.level))
-    in collage 700 500 [ circle 8 |> filled blue |> move position ]
-       |> fromElement
+view action model = 
+  collage 700 500 [ viewAsForm model ]
+  |> fromElement
 
 update : Action -> Model -> (Model, Effects Action)
 update _ model = let 
