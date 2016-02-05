@@ -18,7 +18,7 @@ type alias FallingModel =
   , velocity: Float
   }
 
-type Model = GModel GaltonModel | FModel FallingModel
+type Model = GModel GaltonModel | FModel Int Float Float
 
 init : Time -> Model
 init t = 
@@ -36,8 +36,8 @@ viewAsForm model =
         case model of
           GModel gModel -> 
             (Config.scale * toFloat (gModel.shift), dropLevel-Config.scale * toFloat (gModel.level))
-          FModel fModel -> 
-            (Config.scale * toFloat (fModel.shift), dropLevel-Config.scale * toFloat (Config.levelCount)-fModel.distance)
+          FModel shift distance _ -> 
+            (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
   in circle 3 |> filled blue |> move position 
 
 update : Model -> Model
@@ -56,16 +56,8 @@ update model =
              , seed=newSeed
              }
          else
-           FModel 
-             { shift = newShift
-             , distance = 0
-             , velocity = 0
-             }
+           FModel newShift 0 0
 
-    FModel fModel -> 
-      FModel 
-        { fModel | 
-          distance = fModel.distance + fModel.velocity
-        , velocity = fModel.velocity + 1
-        }
+    FModel shift distance velocity -> 
+      FModel shift (distance + velocity) (velocity + 1)
 
