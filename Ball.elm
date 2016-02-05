@@ -3,7 +3,7 @@ module Ball where
 import Color exposing (blue)
 import Graphics.Collage exposing (filled, move, Form, circle)
 import Time exposing (Time)
-import Dict exposing (Dict)
+import Dict exposing (Dict, get, insert)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Config 
 
@@ -29,10 +29,17 @@ viewAsForm model =
 
   in circle 3 |> filled blue |> move position 
 
+addToBins : Int -> Dict Int Int -> Dict Int Int
+addToBins binNumber bins = 
+  let current = get binNumber bins
+      newValue = case current of 
+                   Nothing -> 1 
+                   Just n -> n + 1
+  in insert binNumber newValue bins
+
 update : (Model, Dict Int Int) -> (Model, Dict Int Int)
 update (model, bins) = 
   case model of
-
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
@@ -40,8 +47,8 @@ update (model, bins) =
           newLevel = (level)+1
       in if (newLevel < Config.levelCount) then
            (Galton newLevel newShift newSeed, bins)
-         else
-           (Falling newShift 0 0, bins)
+         else -- transition to falling
+           (Falling newShift 0 0, addToBins newShift bins)
 
     Falling shift distance velocity -> 
       let newDistance = distance + velocity
