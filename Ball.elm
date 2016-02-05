@@ -16,6 +16,13 @@ type alias GaltonModel =
   , seed : Seed
   }
 
+type alias FallingModel = 
+  { shift : Int
+  , velocity: Float
+  }
+
+type Model = GModel GaltonModel | FModel FallingModel
+
 init : Time -> Model
 init t = 
   GModel { level = 0
@@ -23,21 +30,32 @@ init t =
   , seed = initialSeed (truncate t)
   }
 
-type Model = GModel GaltonModel
 
 viewAsForm : Model -> Form
-viewAsForm (GModel model) = 
-  let dropLevel = toFloat (Config.height//2 - Config.headRoom)
-      position = (Config.scale * toFloat (model.shift), dropLevel-Config.scale * toFloat (model.level))
-  in circle 3 |> filled blue |> move position 
+viewAsForm model = 
+  case model of
+
+    GModel gModel -> 
+      let dropLevel = toFloat (Config.height//2 - Config.headRoom)
+          position = (Config.scale * toFloat (gModel.shift), dropLevel-Config.scale * toFloat (gModel.level))
+      in circle 3 |> filled blue |> move position 
+
+    FModel fModel -> 
+      circle 3 |> filled blue
 
 update : Action -> Model -> (Model, Effects Action)
-update _ (GModel model) = 
-  let deltaShift = map (\b -> if b then 1 else -1) bool
-      (delta, seed) = generate deltaShift model.seed
-  in ( GModel { model | 
-         level=(model.level)+1
-       , shift = model.shift+delta
-       , seed=seed}
-     , Effects.none)
+update _ model = 
+  case model of
+
+    GModel gModel ->
+      let deltaShift = map (\b -> if b then 1 else -1) bool
+          (delta, seed) = generate deltaShift gModel.seed
+      in ( GModel { gModel | 
+             level=(gModel.level)+1
+           , shift = gModel.shift+delta
+           , seed=seed}
+         , Effects.none)
+
+    FModel gModel ->
+      (init 0, Effects.none)
 
