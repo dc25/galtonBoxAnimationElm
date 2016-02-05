@@ -4,7 +4,6 @@ import Color exposing (blue)
 import Graphics.Collage exposing (filled, move, Form, circle)
 import Time exposing (Time)
 import Random exposing (Seed, bool, generate, initialSeed, map)
-import Html exposing (Html, fromElement)
 import Config 
 
 type alias GaltonModel = 
