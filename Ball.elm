@@ -4,7 +4,6 @@ import Color exposing (blue)
 import Graphics.Collage exposing (filled, move, Form, circle)
 import Time exposing (Time)
 import Random exposing (Seed, bool, generate, initialSeed, map)
-import Effects exposing (Effects)
 import Html exposing (Html, fromElement)
 import Config 
 
@@ -43,7 +42,7 @@ viewAsForm model =
     FModel fModel -> 
       circle 3 |> filled blue
 
-update : Action -> Model -> (Model, Effects Action)
+update : Action -> Model -> Model
 update _ model = 
   case model of
 
@@ -52,14 +51,12 @@ update _ model =
           (delta, seed) = generate deltaShift gModel.seed
           newShift = gModel.shift+delta
           newLevel = (gModel.level)+1
-      in ( GModel 
+      in GModel 
              { gModel | 
                  level= newLevel
                , shift = newShift
                , seed=seed
              }
-         , Effects.none)
 
-    FModel gModel ->
-      (init 0, Effects.none)
+    FModel gModel -> init 0
 

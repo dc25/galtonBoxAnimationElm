@@ -31,7 +31,7 @@ update action model =
       let updatedBalls = Ball.init t :: model.balls
       in ({ balls = updatedBalls }, Effects.none)
     Step -> 
-      let updatedBalls = List.map (fst << (Ball.update Ball.Step)) model.balls
+      let updatedBalls = List.map (Ball.update Ball.Step) model.balls
       in ({ balls = updatedBalls }, Effects.none)
 
 
