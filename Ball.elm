@@ -49,5 +49,5 @@ update model =
          else
            Falling shift newDistance (velocity + 1)
 
-    Landed shift distance -> Stable shift distance
+    Landed shift distance -> Landed shift distance
 
