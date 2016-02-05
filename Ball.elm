@@ -34,15 +34,16 @@ init t =
 
 viewAsForm : Model -> Form
 viewAsForm model = 
-  case model of
+  let dropLevel = toFloat (Config.height//2 - Config.headRoom)
+  in case model of
 
-    GModel gModel -> 
-      let dropLevel = toFloat (Config.height//2 - Config.headRoom)
-          position = (Config.scale * toFloat (gModel.shift), dropLevel-Config.scale * toFloat (gModel.level))
-      in circle 3 |> filled blue |> move position 
+       GModel gModel -> 
+         let position = (Config.scale * toFloat (gModel.shift), dropLevel-Config.scale * toFloat (gModel.level))
+         in circle 3 |> filled blue |> move position 
 
-    FModel fModel -> 
-      circle 3 |> filled blue
+       FModel fModel -> 
+         let position = (Config.scale * toFloat (fModel.shift), dropLevel-Config.scale * toFloat (Config.levelCount)-fModel.distance)
+         in circle 3 |> filled blue |> move position
 
 update : Action -> Model -> Model
 update _ model = 
@@ -66,5 +67,10 @@ update _ model =
              , velocity = 0
              }
 
-    FModel gModel -> FModel gModel
+    FModel fModel -> 
+      FModel 
+        { fModel | 
+          distance = fModel.distance + fModel.velocity
+        , velocity = fModel.velocity + 1
+        }
 

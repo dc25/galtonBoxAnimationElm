@@ -24,5 +24,5 @@ apexLevel : Float
 apexLevel = 150.0
 
 levelCount : Int
-levelCount = 45
+levelCount = 30
 
