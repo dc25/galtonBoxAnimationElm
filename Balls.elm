@@ -33,8 +33,16 @@ update action model =
     case action of
       Drop t -> 
         (Ball.init t :: model.balls, model.bins)
+
       Step -> 
-        (List.map Ball.update model.balls, model.bins)
+        -- foldr to execute update, append to balls, replace bins
+        List.foldr 
+          (\ball (ballList, bins) -> 
+             let (updatedBall, updatedBins) = Ball.update (ball, bins) 
+             in (updatedBall :: ballList, updatedBins))
+          ([], model.bins)
+          model.balls
+
   in ({ balls = updatedBalls, bins = updatedBins }, Effects.none)
 
 
