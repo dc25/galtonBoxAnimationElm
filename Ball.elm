@@ -7,8 +7,6 @@ import Random exposing (Seed, bool, generate, initialSeed, map)
 import Html exposing (Html, fromElement)
 import Config 
 
-type Action = Step
-
 type alias GaltonModel = 
   { level : Int
   , shift : Int
@@ -45,8 +43,8 @@ viewAsForm model =
          let position = (Config.scale * toFloat (fModel.shift), dropLevel-Config.scale * toFloat (Config.levelCount)-fModel.distance)
          in circle 3 |> filled blue |> move position
 
-update : Action -> Model -> Model
-update _ model = 
+update : Model -> Model
+update model = 
   case model of
 
     GModel gModel ->
