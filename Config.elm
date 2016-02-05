@@ -9,7 +9,7 @@ dropInterval : Time
 dropInterval = 100
 
 stepInterval : Time
-stepInterval = 50
+stepInterval = 25
 
 width : Int
 width = 500
@@ -22,4 +22,7 @@ headRoom = 50
 
 apexLevel : Float
 apexLevel = 150.0
+
+levelCount : Int
+levelCount = 45
 

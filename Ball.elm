@@ -17,6 +17,7 @@ type alias GaltonModel =
 
 type alias FallingModel = 
   { shift : Int
+  , distance: Float
   , velocity: Float
   }
 
@@ -24,10 +25,11 @@ type Model = GModel GaltonModel | FModel FallingModel
 
 init : Time -> Model
 init t = 
-  GModel { level = 0
-  , shift = 0
-  , seed = initialSeed (truncate t)
-  }
+  GModel 
+    { level = 0
+    , shift = 0
+    , seed = initialSeed (truncate t)
+    }
 
 
 viewAsForm : Model -> Form
@@ -48,15 +50,21 @@ update _ model =
 
     GModel gModel ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
-          (delta, seed) = generate deltaShift gModel.seed
+          (delta, newSeed) = generate deltaShift gModel.seed
           newShift = gModel.shift+delta
           newLevel = (gModel.level)+1
-      in GModel 
-             { gModel | 
-                 level= newLevel
-               , shift = newShift
-               , seed=seed
+      in if (newLevel < Config.levelCount) then
+           GModel 
+             { level= newLevel
+             , shift = newShift
+             , seed=newSeed
+             }
+         else
+           FModel 
+             { shift = newShift
+             , distance = 0
+             , velocity = 0
              }
 
-    FModel gModel -> init 0
+    FModel gModel -> FModel gModel
 
