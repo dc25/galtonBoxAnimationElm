@@ -44,10 +44,10 @@ update model =
 
     Falling shift distance velocity -> 
       let newDistance = distance + velocity
-      in if (newDistance > Config.maxDrop) then
-           Landed shift Config.maxDrop
-         else
+      in if (newDistance < Config.maxDrop) then
            Falling shift newDistance (velocity + 1)
+         else
+           Landed shift Config.maxDrop
 
-    Landed shift distance -> Landed shift distance
+    Landed _ _ -> model
 
