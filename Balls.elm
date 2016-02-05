@@ -26,13 +26,13 @@ tick = Signal.map (\_ -> Step) (every Config.stepInterval)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
-  case action of
-    Drop t -> 
-      let updatedBalls = Ball.init t :: model.balls
-      in ({ balls = updatedBalls }, Effects.none)
-    Step -> 
-      let updatedBalls = List.map Ball.update model.balls
-      in ({ balls = updatedBalls }, Effects.none)
+  let updatedBalls = 
+    case action of
+      Drop t -> 
+        Ball.init t :: model.balls
+      Step -> 
+        List.map Ball.update model.balls
+  in ({ balls = updatedBalls }, Effects.none)
 
 
 view : Signal.Address Action -> Model -> Html
