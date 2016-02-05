@@ -6,7 +6,7 @@ import Time exposing (Time)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Config 
 
-type Model = GModel Int Int Seed | FModel Int Float Float
+type Model = GModel Int Int Seed | FModel Int Float Float | SModel Int Float
 
 init : Time -> Model
 init t = GModel 0 0 (initialSeed(truncate t))
@@ -16,10 +16,16 @@ viewAsForm model =
   let dropLevel = toFloat (Config.height//2 - Config.headRoom)
       position = 
         case model of
+
           GModel level shift seed -> 
             (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat level)
+
           FModel shift distance _ -> 
             (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
+
+          SModel shift distance -> 
+            (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
+
   in circle 3 |> filled blue |> move position 
 
 update : Model -> Model
@@ -37,5 +43,11 @@ update model =
            FModel newShift 0 0
 
     FModel shift distance velocity -> 
-      FModel shift (distance + velocity) (velocity + 1)
+      let newDistance = distance + velocity
+      in if (newDistance > Config.maxDrop) then
+           SModel shift Config.maxDrop
+         else
+           FModel shift newDistance (velocity + 1)
+
+    SModel shift distance -> SModel shift distance
 

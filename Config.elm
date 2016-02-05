@@ -23,6 +23,9 @@ headRoom = 50
 apexLevel : Float
 apexLevel = 150.0
 
+maxDrop : Float
+maxDrop = 300.0
+
 levelCount : Int
 levelCount = 30
 
