@@ -6,10 +6,10 @@ import Time exposing (Time)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Config 
 
-type Model = GModel Int Int Seed | FModel Int Float Float | SModel Int Float
+type Model = Galton Int Int Seed | Falling Int Float Float | Landed Int Float
 
 init : Time -> Model
-init t = GModel 0 0 (initialSeed(truncate t))
+init t = Galton 0 0 (initialSeed(truncate t))
 
 viewAsForm : Model -> Form
 viewAsForm model = 
@@ -17,13 +17,13 @@ viewAsForm model =
       position = 
         case model of
 
-          GModel level shift seed -> 
+          Galton level shift seed -> 
             (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat level)
 
-          FModel shift distance _ -> 
+          Falling shift distance _ -> 
             (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
 
-          SModel shift distance -> 
+          Landed shift distance -> 
             (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
 
   in circle 3 |> filled blue |> move position 
@@ -32,22 +32,22 @@ update : Model -> Model
 update model = 
   case model of
 
-    GModel level shift seed ->
+    Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < Config.levelCount) then
-           GModel newLevel newShift newSeed
+           Galton newLevel newShift newSeed
          else
-           FModel newShift 0 0
+           Falling newShift 0 0
 
-    FModel shift distance velocity -> 
+    Falling shift distance velocity -> 
       let newDistance = distance + velocity
       in if (newDistance > Config.maxDrop) then
-           SModel shift Config.maxDrop
+           Landed shift Config.maxDrop
          else
-           FModel shift newDistance (velocity + 1)
+           Falling shift newDistance (velocity + 1)
 
-    SModel shift distance -> SModel shift distance
+    Landed shift distance -> Stable shift distance
 
