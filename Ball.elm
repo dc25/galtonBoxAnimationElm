@@ -50,10 +50,14 @@ update _ model =
     GModel gModel ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, seed) = generate deltaShift gModel.seed
-      in ( GModel { gModel | 
-             level=(gModel.level)+1
-           , shift = gModel.shift+delta
-           , seed=seed}
+          newShift = gModel.shift+delta
+          newLevel = (gModel.level)+1
+      in ( GModel 
+             { gModel | 
+                 level= newLevel
+               , shift = newShift
+               , seed=seed
+             }
          , Effects.none)
 
     FModel gModel ->
