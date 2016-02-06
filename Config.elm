@@ -3,7 +3,7 @@ module Config where
 import Time exposing (Time)
 
 hscale : Float
-hscale = 8
+hscale = 12
 
 vscale : Float
 vscale = hscale * 2
@@ -21,16 +21,16 @@ height : Int
 height = 1000
 
 headRoom : Int
-headRoom = 50
+headRoom = 30
 
 maxDrop : Float
-maxDrop = 600.0
+maxDrop = 550.0
 
 levelCount : Int
 levelCount = 12
 
 dropCount : Int
-dropCount = 200
+dropCount = 150
 
 ballDiameter : Float
 ballDiameter = hscale/ 2.0
