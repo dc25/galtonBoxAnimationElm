@@ -7,7 +7,7 @@ import Dict exposing (Dict, get, insert)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Config 
 
-type Model = Galton Int Int Seed | Falling Int Float Float | Landed Int Float
+type Model = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
 init : Time -> Model
 init t = Galton 0 0 (initialSeed(truncate t))
@@ -19,23 +19,25 @@ viewAsForm model =
         case model of
 
           Galton level shift seed -> 
-            (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat level)
+            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat level + Config.ballDiameter)
 
-          Falling shift distance _ -> 
-            (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
+          Falling shift distance _ _-> 
+            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat (Config.levelCount)-distance)
 
           Landed shift distance -> 
-            (Config.scale * toFloat shift, dropLevel-Config.scale * toFloat (Config.levelCount)-distance)
+            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat (Config.levelCount)-distance)
 
-  in circle 3 |> filled blue |> move position 
+  in Config.ballDiameter |> circle |> filled blue |> move position 
+
+ballsInBin : Int -> Dict Int Int -> Int
+ballsInBin binNumber bins = 
+  case get binNumber bins of
+    Nothing -> 0
+    Just n -> n
 
 addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
-  let current = get binNumber bins
-      newValue = case current of 
-                   Nothing -> 1 
-                   Just n -> n + 1
-  in insert binNumber newValue bins
+  insert binNumber (ballsInBin binNumber bins + 1) bins
 
 update : (Model, Dict Int Int) -> (Model, Dict Int Int)
 update (model, bins) = 
@@ -48,14 +50,15 @@ update (model, bins) =
       in if (newLevel < Config.levelCount) then
            (Galton newLevel newShift newSeed, bins)
          else -- transition to falling
-           (Falling newShift 0 0, addToBins newShift bins)
+           let floor = Config.maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
+           in (Falling newShift -((Config.vscale)/2.0) 10 floor, addToBins newShift bins)
 
-    Falling shift distance velocity -> 
+    Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
-      in if (newDistance < Config.maxDrop) then
-           (Falling shift newDistance (velocity + 1), bins)
+      in if (newDistance < floor) then
+           (Falling shift newDistance (velocity + 1) floor, bins)
          else
-           (Landed shift Config.maxDrop, bins)
+           (Landed shift floor, bins)
 
     Landed _ _ -> (model, bins)
 

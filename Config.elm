@@ -2,30 +2,33 @@ module Config where
 
 import Time exposing (Time)
 
-scale : Float
-scale = 10
+hscale : Float
+hscale = 12
+
+vscale : Float
+vscale = hscale * 2
 
 dropInterval : Time
-dropInterval = 100
+dropInterval = 200
 
 stepInterval : Time
-stepInterval = 25
+stepInterval = 150
 
 width : Int
-width = 500
+width = 1000
 
 height : Int
-height = 800
+height = 1000
 
 headRoom : Int
 headRoom = 50
 
-apexLevel : Float
-apexLevel = 150.0
-
 maxDrop : Float
-maxDrop = 300.0
+maxDrop = 600.0
 
 levelCount : Int
-levelCount = 30
+levelCount = 9
+
+ballDiameter : Float
+ballDiameter = hscale/ 2.0
 
