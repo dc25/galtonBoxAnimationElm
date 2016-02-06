@@ -15,17 +15,15 @@ init t = Galton 0 0 (initialSeed(truncate t))
 viewAsForm : Model -> Form
 viewAsForm model = 
   let dropLevel = toFloat (Config.height//2 - Config.headRoom)
-      position = 
+      (level, shift, distance) = 
         case model of
-
-          Galton level shift seed -> 
-            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat level + Config.ballDiameter)
-
-          Falling shift distance _ _-> 
-            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat (Config.levelCount)-distance)
-
-          Landed shift distance -> 
-            (Config.hscale * toFloat shift, dropLevel-Config.vscale * toFloat (Config.levelCount)-distance)
+          Galton level shift seed -> (level, shift, 0)
+          Falling shift distance _ _-> (Config.levelCount, shift, distance)
+          Landed shift distance -> (Config.levelCount, shift, distance)
+      floatShift = toFloat shift
+      position = 
+        (             Config.hscale * floatShift
+        , dropLevel - Config.vscale * (toFloat level) - distance + Config.ballDiameter / 2.0)
 
   in Config.ballDiameter |> circle |> filled blue |> move position 
 

@@ -3,16 +3,16 @@ module Config where
 import Time exposing (Time)
 
 hscale : Float
-hscale = 12
+hscale = 8
 
 vscale : Float
 vscale = hscale * 2
 
 dropInterval : Time
-dropInterval = 200
+dropInterval = 300
 
 stepInterval : Time
-stepInterval = 150
+stepInterval = 180
 
 width : Int
 width = 1000
@@ -27,7 +27,7 @@ maxDrop : Float
 maxDrop = 600.0
 
 levelCount : Int
-levelCount = 9
+levelCount = 12
 
 ballDiameter : Float
 ballDiameter = hscale/ 2.0
