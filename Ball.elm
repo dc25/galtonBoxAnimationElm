@@ -17,9 +17,9 @@ type alias Model =
 init : Int -> Color -> Model
 init indx c = {motion = Galton 0 0 (initialSeed indx), color=c}
 
-viewAsForm : Model -> Form
-viewAsForm model = 
-  let dropLevel = toFloat (Config.height//2 - Config.headRoom)
+viewAsForm : (Int, Int) -> Model -> Form
+viewAsForm (_, height) model = 
+  let dropLevel = toFloat (height//2 - Config.topMargin)
       (level, shift, distance) = 
         case model.motion of
           Galton level shift seed -> (level, shift, 0)
@@ -42,8 +42,8 @@ addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
   insert binNumber (ballsInBin binNumber bins + 1) bins
 
-update : (Model, Dict Int Int) -> (Model, Dict Int Int)
-update (model, bins) = 
+update : (Int, Int) -> (Model, Dict Int Int) -> (Model, Dict Int Int)
+update (_, height) (model, bins) = 
   case model.motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
@@ -53,7 +53,8 @@ update (model, bins) =
       in if (newLevel < Config.levelCount) then
            ({model | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
-           let floor = Config.maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
+           let maxDrop = toFloat (height - Config.topMargin - Config.bottomMargin) - toFloat (Config.levelCount) * Config.vscale
+               floor = maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
            in ({model | motion = Falling newShift -((Config.vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 

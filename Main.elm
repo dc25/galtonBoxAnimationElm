@@ -12,12 +12,14 @@ import Config
 type alias Model = 
   { balls : List Ball.Model
   , bins : Dict Int Int
+  , dimensions : (Int,Int)
   }
 
 init : Model
 init =
   { balls = []
   , bins = Dict.empty
+  , dimensions = (0,0)
   }
 
 type Action = Drop Int | Tick (Int, Int)
@@ -39,23 +41,21 @@ colorCycle i =
 
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
-  let (updatedBalls, updatedBins) = 
     case action of
       Drop indx -> 
-        (Ball.init indx (colorCycle indx) :: model.balls, model.bins)
+        ({ model | balls = Ball.init indx (colorCycle indx) :: model.balls}, Effects.none)
 
-      Tick (w,h) -> 
+      Tick dim -> 
         -- foldr to execute update, append to balls, replace bins
-        List.foldr 
-          (\ball (ballList, bins) -> 
-             let (updatedBall, updatedBins) = Ball.update (ball, bins) 
-             in (updatedBall :: ballList, updatedBins))
-          ([], model.bins)
-          model.balls
+        let (updatedBalls, updatedBins) =
+          List.foldr (\ball (ballList, bins) -> 
+                         let (updatedBall, updatedBins) = Ball.update model.dimensions (ball, bins) 
+                         in (updatedBall :: ballList, updatedBins))
+                     ([], model.bins)
+                     model.balls
+        in ({ model | balls = updatedBalls, bins = updatedBins, dimensions = dim}, Effects.none)
 
-  in ({ balls = updatedBalls, bins = updatedBins }, Effects.none)
-
-drawGaltonBox = 
+drawGaltonBox (width, height) = 
    let levels = [0..Config.levelCount-1]
   
        -- [0,2,4,6,8...]
@@ -76,14 +76,16 @@ drawGaltonBox =
 
        peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
 
-       apex = toFloat ((Config.height//2 ) - Config.headRoom)
+       apex = toFloat ((height//2 ) - Config.topMargin)
 
    in List.map (\(x,y) -> move (Config.hscale*toFloat x,  apex - Config.vscale*toFloat y) peg) galtonCoords
 
 view : Signal.Address Action -> Model -> Html
 view action model = 
-  let ballForms = (List.map Ball.viewAsForm model.balls)
-  in collage Config.width Config.height (ballForms ++ drawGaltonBox) |> fromElement
+  let dim = model.dimensions
+      (width, height) = dim
+      ballForms = (List.map (Ball.viewAsForm dim) model.balls)
+  in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement
 
 app : StartApp.App Model
 app = StartApp.start 

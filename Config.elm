@@ -14,17 +14,11 @@ dropInterval = 200
 stepInterval : Time
 stepInterval = 50
 
-width : Int
-width = 1000
+topMargin : Int
+topMargin = 30
 
-height : Int
-height = 1000
-
-headRoom : Int
-headRoom = 30
-
-maxDrop : Float
-maxDrop = 550.0
+bottomMargin : Int
+bottomMargin = 30
 
 levelCount : Int
 levelCount = 12
