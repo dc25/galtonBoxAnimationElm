@@ -51,17 +51,17 @@ update (model, bins) =
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < Config.levelCount) then
-           ({motion = Galton newLevel newShift newSeed, color=model.color}, bins)
+           ({model | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
            let floor = Config.maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
-           in ({motion = Falling newShift -((Config.vscale)/2.0) 10 floor, color=model.color}, addToBins newShift bins)
+           in ({model | motion = Falling newShift -((Config.vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
       in if (newDistance < floor) then
-           ({motion = Falling shift newDistance (velocity + 1) floor, color=model.color}, bins)
+           ({model | motion = Falling shift newDistance (velocity + 1) floor}, bins)
          else -- transtion to landed
-           ({motion = Landed shift floor, color=model.color}, bins)
+           ({model | motion = Landed shift floor}, bins)
 
     Landed _ _ -> (model, bins)
 
