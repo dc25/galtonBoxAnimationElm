@@ -1,22 +1,27 @@
 module Ball where
 
-import Color exposing (blue)
+import Color exposing (Color, blue)
 import Graphics.Collage exposing (filled, move, Form, circle)
 import Time exposing (Time)
 import Dict exposing (Dict, get, insert)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Config 
 
-type Model = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
+type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
+
+type alias Model = 
+  { motion : Motion
+  , color : Color
+  }
 
 init : Time -> Model
-init t = Galton 0 0 (initialSeed(truncate t))
+init t = {motion = Galton 0 0 (initialSeed(truncate t)), color=blue}
 
 viewAsForm : Model -> Form
 viewAsForm model = 
   let dropLevel = toFloat (Config.height//2 - Config.headRoom)
       (level, shift, distance) = 
-        case model of
+        case model.motion of
           Galton level shift seed -> (level, shift, 0)
           Falling shift distance _ _-> (Config.levelCount, shift, distance)
           Landed shift distance -> (Config.levelCount, shift, distance)
@@ -25,7 +30,7 @@ viewAsForm model =
         (             Config.hscale * floatShift
         , dropLevel - Config.vscale * (toFloat level) - distance + Config.ballDiameter / 2.0)
 
-  in Config.ballDiameter |> circle |> filled blue |> move position 
+  in Config.ballDiameter |> circle |> filled model.color |> move position 
 
 ballsInBin : Int -> Dict Int Int -> Int
 ballsInBin binNumber bins = 
@@ -39,24 +44,24 @@ addToBins binNumber bins =
 
 update : (Model, Dict Int Int) -> (Model, Dict Int Int)
 update (model, bins) = 
-  case model of
+  case model.motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < Config.levelCount) then
-           (Galton newLevel newShift newSeed, bins)
+           ({motion = Galton newLevel newShift newSeed, color=model.color}, bins)
          else -- transition to falling
            let floor = Config.maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
-           in (Falling newShift -((Config.vscale)/2.0) 10 floor, addToBins newShift bins)
+           in ({motion = Falling newShift -((Config.vscale)/2.0) 10 floor, color=model.color}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
       in if (newDistance < floor) then
-           (Falling shift newDistance (velocity + 1) floor, bins)
-         else
-           (Landed shift floor, bins)
+           ({motion = Falling shift newDistance (velocity + 1) floor, color=model.color}, bins)
+         else -- transtion to landed
+           ({motion = Landed shift floor, color=model.color}, bins)
 
     Landed _ _ -> (model, bins)
 
