@@ -1,7 +1,6 @@
-module Balls where
-
-import Time exposing (Time, every)
+import StartApp exposing (..)
 import Effects exposing (Effects)
+import Time exposing (Time, every)
 import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move)
 import Ball exposing (init, update, viewAsForm)
@@ -84,3 +83,18 @@ view action model =
 
 
 
+
+
+
+
+
+app : StartApp.App Model
+app = StartApp.start 
+  { init = (init, Effects.none)
+  , update = update
+  , view = view
+  , inputs = [ drop, tick ]
+  }
+
+main : Signal Html
+main = app.html
