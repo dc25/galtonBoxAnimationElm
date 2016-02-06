@@ -20,7 +20,7 @@ init =
   , bins = Dict.empty
   }
 
-type Action = Drop Int | Step | Tick (Int, Int)
+type Action = Drop Int | Tick (Int, Int)
 
 drop : Signal Action 
 drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
@@ -28,10 +28,7 @@ drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
      |> Signal.map (\t -> Drop t) 
 
 tick : Signal Action 
-tick = Signal.map (\_ -> Step) (every Config.stepInterval)
-
-tick2 : Signal Action 
-tick2  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
+tick  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -47,7 +44,7 @@ update action model =
       Drop indx -> 
         (Ball.init indx (colorCycle indx) :: model.balls, model.bins)
 
-      Step -> 
+      Tick (w,h) -> 
         -- foldr to execute update, append to balls, replace bins
         List.foldr 
           (\ball (ballList, bins) -> 
@@ -56,8 +53,6 @@ update action model =
           ([], model.bins)
           model.balls
 
-      Tick p -> 
-          (model.balls, model.bins)
   in ({ balls = updatedBalls, bins = updatedBins }, Effects.none)
 
 drawGaltonBox = 
