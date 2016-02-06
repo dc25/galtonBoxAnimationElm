@@ -56,13 +56,16 @@ update action model =
 
 drawGaltonBox = 
    let levels = [0..Config.levelCount-1]
-
+  
+       -- [0,2,4,6,8...]
        doubles = List.map (\n -> 2 * n) levels
 
+       -- [[0], [0,2], [0,2,4], [0,2,4,6], [0,2,4,6,8],...]
        sequences = case List.tail (List.scanl (::) [] (doubles)) of
          Nothing -> []
          Just ls -> ls
 
+       -- [(0,0), (-1,1),(1,1), (-2,2),(0,2),(2,2), (-3,3),(-1,3),(1,3),(3,3), (-4,4),(-2,4),(0,4),(2,4),(4,4),...]
        galtonCoords = 
          List.map2 
            (\ls level -> List.map (\n -> (n - level, level)) ls) 
