@@ -1,4 +1,5 @@
 import StartApp exposing (..)
+import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Color exposing (Color, black, red, blue, green)
@@ -19,7 +20,7 @@ init =
   , bins = Dict.empty
   }
 
-type Action = Drop Int | Step
+type Action = Drop Int | Step | Tick (Int, Int)
 
 drop : Signal Action 
 drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
@@ -28,6 +29,9 @@ drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
 
 tick : Signal Action 
 tick = Signal.map (\_ -> Step) (every Config.stepInterval)
+
+tick2 : Signal Action 
+tick2  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -52,6 +56,8 @@ update action model =
           ([], model.bins)
           model.balls
 
+      Tick p -> 
+          (model.balls, model.bins)
   in ({ balls = updatedBalls, bins = updatedBins }, Effects.none)
 
 drawGaltonBox = 
