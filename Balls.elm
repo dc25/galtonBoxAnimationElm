@@ -27,7 +27,6 @@ drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
      |> Signal.filter ((>) (Config.dropCount)) 0 
      |> Signal.map (\t -> Drop t) 
 
-
 tick : Signal Action 
 tick = Signal.map (\_ -> Step) (every Config.stepInterval)
 
@@ -78,12 +77,10 @@ drawGaltonBox =
 
    in List.map (\(x,y) -> move (Config.hscale*toFloat x,  apex - Config.vscale*toFloat y) peg) galtonCoords
 
-drawBallBins = []
-
 view : Signal.Address Action -> Model -> Html
 view action model = 
   let ballForms = (List.map Ball.viewAsForm model.balls)
-  in collage Config.width Config.height (ballForms ++ drawGaltonBox ++ drawBallBins) |> fromElement
+  in collage Config.width Config.height (ballForms ++ drawGaltonBox) |> fromElement
 
 
 
