@@ -81,13 +81,6 @@ view action model =
   let ballForms = (List.map Ball.viewAsForm model.balls)
   in collage Config.width Config.height (ballForms ++ drawGaltonBox) |> fromElement
 
-
-
-
-
-
-
-
 app : StartApp.App Model
 app = StartApp.start 
   { init = (init, Effects.none)
