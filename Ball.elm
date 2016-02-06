@@ -14,8 +14,8 @@ type alias Model =
   , color : Color
   }
 
-init : Time -> Model
-init t = {motion = Galton 0 0 (initialSeed(truncate t)), color=blue}
+init : Int -> Color -> Model
+init indx c = {motion = Galton 0 0 (initialSeed indx), color=c}
 
 viewAsForm : Model -> Form
 viewAsForm model = 

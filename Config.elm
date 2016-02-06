@@ -9,10 +9,10 @@ vscale : Float
 vscale = hscale * 2
 
 dropInterval : Time
-dropInterval = 300
+dropInterval = 200
 
 stepInterval : Time
-stepInterval = 180
+stepInterval = 50
 
 width : Int
 width = 1000
@@ -28,6 +28,9 @@ maxDrop = 600.0
 
 levelCount : Int
 levelCount = 12
+
+dropCount : Int
+dropCount = 200
 
 ballDiameter : Float
 ballDiameter = hscale/ 2.0

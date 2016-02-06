@@ -2,7 +2,7 @@ module Balls where
 
 import Time exposing (Time, every)
 import Effects exposing (Effects)
-import Color exposing (red)
+import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move)
 import Ball exposing (init, update, viewAsForm)
 import Html exposing (Html, fromElement)
@@ -20,21 +20,30 @@ init =
   , bins = Dict.empty
   }
 
-type Action = Drop Time | Step
+type Action = Drop Int | Step
 
 drop : Signal Action 
-drop = Signal.map (\t -> Drop t) (every Config.dropInterval)
+drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
+     |> Signal.filter ((>) (Config.dropCount)) 0 
+     |> Signal.map (\t -> Drop t) 
+
 
 tick : Signal Action 
 tick = Signal.map (\_ -> Step) (every Config.stepInterval)
+
+colorCycle : Int -> Color
+colorCycle i =
+    case i % 3 of
+        0 -> red
+        1 -> blue
+        _ -> green
 
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
   let (updatedBalls, updatedBins) = 
     case action of
-      Drop t -> 
-        (Ball.init t :: model.balls, model.bins)
-
+      Drop indx -> 
+        (Ball.init indx (colorCycle indx) :: model.balls, model.bins)
 
       Step -> 
         -- foldr to execute update, append to balls, replace bins
@@ -63,7 +72,7 @@ drawGaltonBox =
            levels
          |> List.concat
 
-       peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled red 
+       peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
 
        apex = toFloat ((Config.height//2 ) - Config.headRoom)
 
