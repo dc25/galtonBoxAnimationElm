@@ -123,10 +123,10 @@ view address model =
         [ text "GO!" ]
      ] ++ 
      [ 
-        let dim = model.dimensions
-            (width, height) = dim
-            ballForms = (List.map (Ball.viewAsForm dim) model.balls)
-        in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
+       let dim = model.dimensions
+           (width, height) = dim
+           ballForms = (List.map (Ball.viewAsForm dim) model.balls)
+       in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
      ])
 
 myStyle : Attribute
