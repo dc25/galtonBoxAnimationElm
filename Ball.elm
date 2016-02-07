@@ -6,26 +6,13 @@ import Time exposing (Time)
 import Dict exposing (Dict, get, insert)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 
-
-hscale : Float
-hscale = 10
-
-vscale : Float
+-- Display related parameters.
+hscale = 10.0
 vscale = hscale * 2
-
-topMargin : Int
 topMargin = 30
-
-bottomMargin : Int
 bottomMargin = 30
-
-levelCount : Int
 levelCount = 12
-
-dropCount : Int
 dropCount = 90
-
-ballDiameter : Float
 ballDiameter = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
