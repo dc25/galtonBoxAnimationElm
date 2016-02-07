@@ -40,12 +40,6 @@ viewAsForm (_, height) model =
 
   in ballDiameter |> circle |> filled model.color |> move position 
 
-ballsInBin : Int -> Dict Int Int -> Int
-ballsInBin binNumber bins = 
-  case get binNumber bins of
-    Nothing -> 0
-    Just n -> n
-
 drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
    let levels = [0..levelCount-1]
@@ -78,6 +72,12 @@ drawGaltonBox (width, height) =
        apex = toFloat ((height//2 ) - topMargin)
 
    in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
+
+ballsInBin : Int -> Dict Int Int -> Int
+ballsInBin binNumber bins = 
+  case get binNumber bins of
+    Nothing -> 0
+    Just n -> n
 
 addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
