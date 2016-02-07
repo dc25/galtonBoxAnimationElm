@@ -5,7 +5,7 @@ import Time exposing (Time, every)
 import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form)
 import Ball exposing (init, update, viewAsForm)
-import Html exposing (Attribute, Html, fromElement, text, div, input)
+import Html exposing (Attribute, Html, fromElement, text, div, input, button)
 import Html.Attributes exposing (placeholder, value, style)
 import Html.Events exposing (on, targetValue)
 import Dict exposing (Dict)
@@ -24,7 +24,7 @@ init : Model
 init =
   { balls = []
   , bins = Dict.empty
-  , dimensions = Config.dimensions
+  , dimensions = (500,600)
   , dropCount = 5
   }
 
@@ -103,7 +103,13 @@ view address model =
         , on "input" targetValue (Signal.message address << SetCount)
         , myStyle
         ]
-        []
+        [],
+
+       button
+        [ 
+        myStyle
+        ]
+        [ text "GO!" ]
      ] ++ 
      [ 
         let dim = model.dimensions

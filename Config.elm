@@ -8,9 +8,6 @@ hscale = 10
 vscale : Float
 vscale = hscale * 2
 
-dimensions : (Int, Int)
-dimensions = (500, 600)
-
 dropInterval : Time
 dropInterval = 200
 
