@@ -17,6 +17,7 @@ type alias Model =
   { balls : List Ball.Model
   , bins : Dict Int Int
   , dimensions : (Int,Int)
+  , dropCountString : String
   , dropCount : Int
   , started : Bool
   }
@@ -26,17 +27,18 @@ init =
   { balls = []
   , bins = Dict.empty
   , dimensions = (500,600)
-  , dropCount = 5
+  , dropCountString = ""
+  , dropCount = 0
   , started = False
   }
 
-type Action = Drop Int | Tick | SetCount String | Go
+type Action = Drop Int | Tick | SetCountString String | Go
 
 drop : Signal Action 
-drop = Signal.map (\t -> Drop (truncate t)) (every Config.dropInterval)
+drop = Signal.map (\t -> Drop (truncate t)) (every 200)
 
 tick : Signal Action 
-tick  = Signal.map (\t -> Tick) (every Config.stepInterval)
+tick  = Signal.map (\t -> Tick) (every 50)
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -49,18 +51,20 @@ update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
       Go ->
-        ({model | started = True}, Effects.none)
+        let dropCount = toInt model.dropCountString |> withDefault 0 
+            started = dropCount > 0
+            dropCountString = if (started) then "" else model.dropCountString
+        in ({model | dropCount = dropCount, dropCountString = dropCountString, started = started}, Effects.none)
 
-      SetCount count -> 
-        let dropCount = toInt count |> withDefault 0 
-        in ({ model | dropCount = dropCount}, Effects.none)
+      SetCountString count -> 
+        ({ model | dropCountString = count}, Effects.none)
 
       Drop n -> 
         if (model.started && model.dropCount > 0) then
             let newDropCount = model.dropCount - 1
             in ({ model | 
                   dropCount = newDropCount, 
-                  started = model.dropCount - 1 > 0, 
+                  started = newDropCount > 0,
                   balls = Ball.init n (colorCycle n) :: model.balls}, Effects.none)
         else
            (model, Effects.none)
@@ -113,7 +117,11 @@ view address model =
   div []
     ([ input
         [ placeholder "How many?"
-        , on "input" targetValue (Signal.message address << SetCount)
+        , let showString = if (model.started)
+                           then toString model.dropCount
+                           else model.dropCountString
+          in value showString
+        , on "input" targetValue (Signal.message address << SetCountString)
         , myStyle
         ]
         [],
