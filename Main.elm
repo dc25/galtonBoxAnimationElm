@@ -23,11 +23,11 @@ init : Model
 init =
   { balls = []
   , bins = Dict.empty
-  , dimensions = (0,0)
+  , dimensions = Config.dimensions
   , dropCount = 75
   }
 
-type Action = Drop Int | Tick (Int, Int) | SetCount Int
+type Action = Drop Int | Tick | SetCount Int
 
 drop : Int -> Signal Action 
 drop count = 
@@ -36,7 +36,8 @@ drop count =
   |> Signal.map (\t -> Drop t) 
 
 tick : Signal Action 
-tick  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
+-- tick  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
+tick  = Signal.map (\t -> Tick) (every Config.stepInterval)
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -53,7 +54,7 @@ update action model =
       Drop indx -> 
         ({ model | balls = Ball.init indx (colorCycle indx) :: model.balls}, Effects.none)
 
-      Tick dim -> 
+      Tick -> 
         -- foldr to execute update, append to balls, replace bins
        let (updatedBalls, updatedBins) =
           List.foldr (\ball (ballList, bins) -> 
@@ -61,7 +62,7 @@ update action model =
                          in (updatedBall :: ballList, updatedBins))
                      ([], model.bins)
                      model.balls
-        in ({ model | balls = updatedBalls, bins = updatedBins, dimensions = dim}, Effects.none)
+        in ({ model | balls = updatedBalls, bins = updatedBins}, Effects.none)
 
 drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
