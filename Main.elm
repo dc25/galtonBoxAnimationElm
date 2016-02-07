@@ -9,7 +9,8 @@ import Html exposing (Attribute, Html, fromElement, text, div, input)
 import Html.Attributes exposing (placeholder, value, style)
 import Html.Events exposing (on, targetValue)
 import Dict exposing (Dict)
-import String
+import String exposing (toInt)
+import Result exposing (withDefault)
 import Config
 
 type alias Model = 
@@ -27,7 +28,7 @@ init =
   , dropCount = 75
   }
 
-type Action = Drop Int | Tick | SetCount Int
+type Action = Drop Int | Tick | SetCount String
 
 drop : Int -> Signal Action 
 drop count = 
@@ -50,7 +51,8 @@ update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
       SetCount count -> 
-        ({ model | dropCount = count}, Effects.none)
+        let dropCount = toInt count |> withDefault 0 
+        in ({ model | dropCount = dropCount}, Effects.none)
       Drop indx -> 
         ({ model | balls = Ball.init indx (colorCycle indx) :: model.balls}, Effects.none)
 
@@ -96,7 +98,7 @@ view address model =
     ([ input
         [ placeholder "How many?"
         , value (toString model.dropCount)
-        , on "input" targetValue (Signal.message address << SetCount << Result.withDefault 0 << String.toInt)
+        , on "input" targetValue (Signal.message address << SetCount)
         , myStyle
         ]
         []
