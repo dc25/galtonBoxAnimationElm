@@ -7,7 +7,7 @@ import Graphics.Collage exposing (collage, polygon, filled, move, Form)
 import Ball exposing (init, update, viewAsForm)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
 import Html.Attributes exposing (placeholder, value, style)
-import Html.Events exposing (on, targetValue)
+import Html.Events exposing (on, targetValue, onClick)
 import Dict exposing (Dict)
 import String exposing (toInt)
 import Result exposing (withDefault)
@@ -18,6 +18,7 @@ type alias Model =
   , bins : Dict Int Int
   , dimensions : (Int,Int)
   , dropCount : Int
+  , started : Bool
   }
 
 init : Model
@@ -26,9 +27,10 @@ init =
   , bins = Dict.empty
   , dimensions = (500,600)
   , dropCount = 5
+  , started = False
   }
 
-type Action = Drop Int | Tick | SetCount String
+type Action = Drop Int | Tick | SetCount String | Go
 
 drop : Signal Action 
 drop = Signal.map (\t -> Drop (truncate t)) (every Config.dropInterval)
@@ -46,15 +48,20 @@ colorCycle i =
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
+      Go ->
+        ({model | started = True}, Effects.none)
+
       SetCount count -> 
         let dropCount = toInt count |> withDefault 0 
         in ({ model | dropCount = dropCount}, Effects.none)
 
       Drop n -> 
-        if (model.dropCount > 0) then
-            ({ model | 
-               dropCount = model.dropCount - 1, 
-               balls = Ball.init n (colorCycle n) :: model.balls}, Effects.none)
+        if (model.started && model.dropCount > 0) then
+            let newDropCount = model.dropCount - 1
+            in ({ model | 
+                  dropCount = newDropCount, 
+                  started = model.dropCount - 1 > 0, 
+                  balls = Ball.init n (colorCycle n) :: model.balls}, Effects.none)
         else
            (model, Effects.none)
 
@@ -72,15 +79,22 @@ drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
    let levels = [0..Config.levelCount-1]
   
+       -- doubles :
        -- [0,2,4,6,8...]
        doubles = List.map (\n -> 2 * n) levels
 
+       -- sequences :
        -- [[0], [0,2], [0,2,4], [0,2,4,6], [0,2,4,6,8],...]
        sequences = case List.tail (List.scanl (::) [] (doubles)) of
          Nothing -> []
          Just ls -> ls
 
-       -- [(0,0), (-1,1),(1,1), (-2,2),(0,2),(2,2), (-3,3),(-1,3),(1,3),(3,3), (-4,4),(-2,4),(0,4),(2,4),(4,4),...]
+       -- galtonCoords :
+       -- [                            (0,0), 
+       --                       (-1,1),      (1,1), 
+       --                (-2,2),       (0,2),      (2,2), 
+       --         (-3,3),       (-1,3),      (1,3),      (3,3), 
+       --  (-4,4),       (-2,4),       (0,4),      (2,4),      (4,4), ...]
        galtonCoords = 
          List.map2 
            (\ls level -> List.map (\n -> (n - level, level)) ls) 
@@ -99,16 +113,13 @@ view address model =
   div []
     ([ input
         [ placeholder "How many?"
-        , value (toString model.dropCount)
         , on "input" targetValue (Signal.message address << SetCount)
         , myStyle
         ]
         [],
 
        button
-        [ 
-        myStyle
-        ]
+        [ onClick address Go ]
         [ text "GO!" ]
      ] ++ 
      [ 
@@ -117,7 +128,6 @@ view address model =
             ballForms = (List.map (Ball.viewAsForm dim) model.balls)
         in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
      ])
-
 
 myStyle : Attribute
 myStyle =
