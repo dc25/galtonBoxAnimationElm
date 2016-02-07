@@ -3,7 +3,7 @@ import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Color exposing (Color, black, red, blue, green)
-import Graphics.Collage exposing (collage, polygon, filled, move)
+import Graphics.Collage exposing (collage, polygon, filled, move, Form)
 import Ball exposing (init, update, viewAsForm)
 import Html exposing (Attribute, Html, fromElement, text, div, input)
 import Html.Attributes exposing (placeholder, value, style)
@@ -63,6 +63,7 @@ update action model =
                      model.balls
         in ({ model | balls = updatedBalls, bins = updatedBins, dimensions = dim}, Effects.none)
 
+drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
    let levels = [0..Config.levelCount-1]
   
