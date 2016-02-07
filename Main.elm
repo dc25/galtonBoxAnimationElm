@@ -5,14 +5,18 @@ import Time exposing (Time, every)
 import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move)
 import Ball exposing (init, update, viewAsForm)
-import Html exposing (Html, fromElement)
+import Html exposing (Attribute, Html, fromElement, text, div, input)
+import Html.Attributes exposing (placeholder, value, style)
+import Html.Events exposing (on, targetValue)
 import Dict exposing (Dict)
+import String
 import Config
 
 type alias Model = 
   { balls : List Ball.Model
   , bins : Dict Int Int
   , dimensions : (Int,Int)
+  , dropCount : Int
   }
 
 init : Model
@@ -20,14 +24,16 @@ init =
   { balls = []
   , bins = Dict.empty
   , dimensions = (0,0)
+  , dropCount = 75
   }
 
-type Action = Drop Int | Tick (Int, Int)
+type Action = Drop Int | Tick (Int, Int) | SetCount Int
 
-drop : Signal Action 
-drop = Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
-     |> Signal.filter ((>) (Config.dropCount)) 0 
-     |> Signal.map (\t -> Drop t) 
+drop : Int -> Signal Action 
+drop count = 
+  Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
+  |> Signal.filter ((>) count) 0 
+  |> Signal.map (\t -> Drop t) 
 
 tick : Signal Action 
 tick  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
@@ -42,12 +48,14 @@ colorCycle i =
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
+      SetCount count -> 
+        ({ model | dropCount = count}, Effects.none)
       Drop indx -> 
         ({ model | balls = Ball.init indx (colorCycle indx) :: model.balls}, Effects.none)
 
       Tick dim -> 
         -- foldr to execute update, append to balls, replace bins
-        let (updatedBalls, updatedBins) =
+       let (updatedBalls, updatedBins) =
           List.foldr (\ball (ballList, bins) -> 
                          let (updatedBall, updatedBins) = Ball.update model.dimensions (ball, bins) 
                          in (updatedBall :: ballList, updatedBins))
@@ -81,18 +89,40 @@ drawGaltonBox (width, height) =
    in List.map (\(x,y) -> move (Config.hscale*toFloat x,  apex - Config.vscale*toFloat y) peg) galtonCoords
 
 view : Signal.Address Action -> Model -> Html
-view action model = 
-  let dim = model.dimensions
-      (width, height) = dim
-      ballForms = (List.map (Ball.viewAsForm dim) model.balls)
-  in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement
+view address model = 
+  div []
+    ([ input
+        [ placeholder "How many?"
+        , value (toString model.dropCount)
+        , on "input" targetValue (Signal.message address << SetCount << Result.withDefault 0 << String.toInt)
+        , myStyle
+        ]
+        []
+     ] ++ 
+     [ 
+        let dim = model.dimensions
+            (width, height) = dim
+            ballForms = (List.map (Ball.viewAsForm dim) model.balls)
+        in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
+     ])
+
+
+myStyle : Attribute
+myStyle =
+  style
+    [ ("width", "10%")
+    , ("height", "20px")
+    , ("padding", "0 0 0 0")
+    , ("font-size", "1em")
+    , ("text-align", "left")
+    ]
 
 app : StartApp.App Model
 app = StartApp.start 
   { init = (init, Effects.none)
   , update = update
   , view = view
-  , inputs = [ drop, tick ]
+  , inputs = [ drop init.dropCount, tick ]
   }
 
 main : Signal Html
