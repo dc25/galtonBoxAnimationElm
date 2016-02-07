@@ -1,11 +1,32 @@
 module Ball where
 
-import Color exposing (Color, blue)
-import Graphics.Collage exposing (filled, move, Form, circle)
+import Color exposing (Color, black)
+import Graphics.Collage exposing (filled, move, Form, circle, polygon)
 import Time exposing (Time)
 import Dict exposing (Dict, get, insert)
 import Random exposing (Seed, bool, generate, initialSeed, map)
-import Config 
+
+
+hscale : Float
+hscale = 10
+
+vscale : Float
+vscale = hscale * 2
+
+topMargin : Int
+topMargin = 30
+
+bottomMargin : Int
+bottomMargin = 30
+
+levelCount : Int
+levelCount = 12
+
+dropCount : Int
+dropCount = 90
+
+ballDiameter : Float
+ballDiameter = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
@@ -19,24 +40,57 @@ init indx c = {motion = Galton 0 0 (initialSeed indx), color=c}
 
 viewAsForm : (Int, Int) -> Model -> Form
 viewAsForm (_, height) model = 
-  let dropLevel = toFloat (height//2 - Config.topMargin)
+  let dropLevel = toFloat (height//2 - topMargin)
       (level, shift, distance) = 
         case model.motion of
           Galton level shift seed -> (level, shift, 0)
-          Falling shift distance _ _-> (Config.levelCount, shift, distance)
-          Landed shift distance -> (Config.levelCount, shift, distance)
+          Falling shift distance _ _-> (levelCount, shift, distance)
+          Landed shift distance -> (levelCount, shift, distance)
       floatShift = toFloat shift
       position = 
-        (             Config.hscale * floatShift
-        , dropLevel - Config.vscale * (toFloat level) - distance + Config.ballDiameter / 2.0)
+        (             hscale * floatShift
+        , dropLevel - vscale * (toFloat level) - distance + ballDiameter / 2.0)
 
-  in Config.ballDiameter |> circle |> filled model.color |> move position 
+  in ballDiameter |> circle |> filled model.color |> move position 
 
 ballsInBin : Int -> Dict Int Int -> Int
 ballsInBin binNumber bins = 
   case get binNumber bins of
     Nothing -> 0
     Just n -> n
+
+drawGaltonBox : (Int, Int) -> List Form
+drawGaltonBox (width, height) = 
+   let levels = [0..levelCount-1]
+  
+       -- doubles :
+       -- [0,2,4,6,8...]
+       doubles = List.map (\n -> 2 * n) levels
+
+       -- sequences :
+       -- [[0], [0,2], [0,2,4], [0,2,4,6], [0,2,4,6,8],...]
+       sequences = case List.tail (List.scanl (::) [] (doubles)) of
+         Nothing -> []
+         Just ls -> ls
+
+       -- galtonCoords :
+       -- [                            (0,0), 
+       --                       (-1,1),      (1,1), 
+       --                (-2,2),       (0,2),      (2,2), 
+       --         (-3,3),       (-1,3),      (1,3),      (3,3), 
+       --  (-4,4),       (-2,4),       (0,4),      (2,4),      (4,4), ...]
+       galtonCoords = 
+         List.map2 
+           (\ls level -> List.map (\n -> (n - level, level)) ls) 
+           sequences 
+           levels
+         |> List.concat
+
+       peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
+
+       apex = toFloat ((height//2 ) - topMargin)
+
+   in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
 
 addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
@@ -50,12 +104,12 @@ update (_, height) (model, bins) =
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
-      in if (newLevel < Config.levelCount) then
+      in if (newLevel < levelCount) then
            ({model | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
-           let maxDrop = toFloat (height - Config.topMargin - Config.bottomMargin) - toFloat (Config.levelCount) * Config.vscale
-               floor = maxDrop - toFloat (ballsInBin newShift bins) * (Config.ballDiameter + 1)* 2 
-           in ({model | motion = Falling newShift -((Config.vscale)/2.0) 10 floor}, addToBins newShift bins)
+           let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
+               floor = maxDrop - toFloat (ballsInBin newShift bins) * (ballDiameter + 1)* 2 
+           in ({model | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
