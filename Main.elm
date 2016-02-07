@@ -25,19 +25,15 @@ init =
   { balls = []
   , bins = Dict.empty
   , dimensions = Config.dimensions
-  , dropCount = 75
+  , dropCount = 5
   }
 
 type Action = Drop Int | Tick | SetCount String
 
-drop : Int -> Signal Action 
-drop count = 
-  Signal.foldp (\_ c -> c+1) 0 (every Config.dropInterval)
-  |> Signal.filter ((>) count) 0 
-  |> Signal.map (\t -> Drop t) 
+drop : Signal Action 
+drop = Signal.map (\t -> Drop (truncate t)) (every Config.dropInterval)
 
 tick : Signal Action 
--- tick  = Signal.map Tick (Signal.sampleOn (every Config.stepInterval) dimensions)
 tick  = Signal.map (\t -> Tick) (every Config.stepInterval)
 
 colorCycle : Int -> Color
@@ -53,8 +49,14 @@ update action model =
       SetCount count -> 
         let dropCount = toInt count |> withDefault 0 
         in ({ model | dropCount = dropCount}, Effects.none)
-      Drop indx -> 
-        ({ model | balls = Ball.init indx (colorCycle indx) :: model.balls}, Effects.none)
+
+      Drop n -> 
+        if (model.dropCount > 0) then
+            ({ model | 
+               dropCount = model.dropCount - 1, 
+               balls = Ball.init n (colorCycle n) :: model.balls}, Effects.none)
+        else
+           (model, Effects.none)
 
       Tick -> 
         -- foldr to execute update, append to balls, replace bins
@@ -126,7 +128,7 @@ app = StartApp.start
   { init = (init, Effects.none)
   , update = update
   , view = view
-  , inputs = [ drop init.dropCount, tick ]
+  , inputs = [ drop , tick ]
   }
 
 main : Signal Html
