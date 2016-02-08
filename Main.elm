@@ -178,7 +178,7 @@ view address model =
   div []
     [ input
         [ placeholder "How many?"
-        , let showString = if (model.started)
+        , let showString = if (model.started) -- count down if started
                            then toString model.count
                            else model.countString
           in value showString
