@@ -1,9 +1,7 @@
 import StartApp exposing (..)
-import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form, circle)
-import Coin exposing (initCoin, updateCoin, viewAsForm, drawGaltonBox)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
 import Html.Attributes exposing (placeholder, value, style, disabled)
 import Html.Events exposing (on, targetValue, onClick)
@@ -24,10 +22,7 @@ coinDiameter = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
-type alias Coin = 
-  { motion : Motion
-  , color : Color
-  }
+type Coin = Coin Motion Color
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -37,13 +32,13 @@ colorCycle i =
         _ -> green
 
 initCoin : Int -> Coin
-initCoin indx = {motion = Galton 0 0 (initialSeed indx), color=colorCycle indx}
+initCoin indx = Coin (Galton 0 0 (initialSeed indx)) (colorCycle indx)
 
-viewAsForm : (Int, Int) -> Coin -> Form
-viewAsForm (_, height) coin = 
+drawCoin : (Int, Int) -> Coin -> Form
+drawCoin (_, height) (Coin motion color) = 
   let dropLevel = toFloat (height//2 - topMargin)
       (level, shift, distance) = 
-        case coin.motion of
+        case motion of
           Galton level shift seed -> (level, shift, 0)
           Falling shift distance _ _-> (levelCount, shift, distance)
           Landed shift distance -> (levelCount, shift, distance)
@@ -52,10 +47,10 @@ viewAsForm (_, height) coin =
         (             hscale * floatShift
         , dropLevel - vscale * (toFloat level) - distance + coinDiameter / 2.0)
 
-  in coinDiameter |> circle |> filled coin.color |> move position 
+  in coinDiameter |> circle |> filled color |> move position 
 
 drawGaltonBox : (Int, Int) -> List Form
-drawGaltonBox (width, height) = 
+drawGaltonBox (_, height) = 
    let levels = [0..levelCount-1]
   
        -- doubles :
@@ -98,31 +93,31 @@ addToBins binNumber bins =
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
 updateCoin : (Int, Int) -> (Coin, Dict Int Int) -> (Coin, Dict Int Int)
-updateCoin (_, height) (coin, bins) = 
-  case coin.motion of
+updateCoin (_, height) (Coin motion color, bins) = 
+  case motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < levelCount) then
-           ({coin | motion = Galton newLevel newShift newSeed}, bins)
+           (Coin (Galton newLevel newShift newSeed) color, bins)
          else -- transition to falling
            let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
                floor = maxDrop - toFloat (coinsInBin newShift bins) * (coinDiameter*2 + 1)
-           in ({coin | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
+           in (Coin (Falling newShift -((vscale)/2.0) 10 floor) color, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
       in if (newDistance < floor) then
-           ({coin | motion = Falling shift newDistance (velocity + 1) floor}, bins)
+           (Coin (Falling shift newDistance (velocity + 1) floor) color, bins)
          else -- transtion to landed
-           ({coin | motion = Landed shift floor}, bins)
+           (Coin (Landed shift floor) color, bins)
 
-    Landed _ _ -> (coin, bins)
+    Landed _ _ -> (Coin motion color, bins)
 
 type alias Model = 
-  { coins : List Coin.Coin
+  { coins : List Coin
   , bins : Dict Int Int
   , dimensions : (Int,Int)
   , dropCountString : String
@@ -166,7 +161,7 @@ update action model =
             in ({ model | 
                   dropCount = newDropCount, 
                   started = newDropCount > 0,
-                  coins = Coin.initCoin n :: model.coins}, Effects.none)
+                  coins = initCoin n :: model.coins}, Effects.none)
         else
            (model, Effects.none)
 
@@ -174,7 +169,7 @@ update action model =
         -- foldr to execute update, append to coins, replace bins
         let (updatedCoins, updatedBins) =
           List.foldr (\coin (coinList, bins) -> 
-                         let (updatedCoin, updatedBins) = Coin.updateCoin model.dimensions (coin, bins) 
+                         let (updatedCoin, updatedBins) = updateCoin model.dimensions (coin, bins) 
                          in (updatedCoin :: coinList, updatedBins))
                      ([], model.bins)
                      model.coins
@@ -204,7 +199,7 @@ view address model =
 
      , let dim = model.dimensions
            (width, height) = dim
-           coinForms = (List.map (Coin.viewAsForm dim) model.coins)
+           coinForms = (List.map (drawCoin dim) model.coins)
        in collage width height (coinForms ++ drawGaltonBox dim) |> fromElement 
     ]
 
