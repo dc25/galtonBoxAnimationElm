@@ -17,7 +17,7 @@ coinDiameter = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
-type alias Model = 
+type alias Coin = 
   { motion : Motion
   , color : Color
   }
@@ -29,14 +29,14 @@ colorCycle i =
         1 -> blue
         _ -> green
 
-init : Int -> Model
+init : Int -> Coin
 init indx = {motion = Galton 0 0 (initialSeed indx), color=colorCycle indx}
 
-viewAsForm : (Int, Int) -> Model -> Form
-viewAsForm (_, height) model = 
+viewAsForm : (Int, Int) -> Coin -> Form
+viewAsForm (_, height) coin = 
   let dropLevel = toFloat (height//2 - topMargin)
       (level, shift, distance) = 
-        case model.motion of
+        case coin.motion of
           Galton level shift seed -> (level, shift, 0)
           Falling shift distance _ _-> (levelCount, shift, distance)
           Landed shift distance -> (levelCount, shift, distance)
@@ -45,7 +45,7 @@ viewAsForm (_, height) model =
         (             hscale * floatShift
         , dropLevel - vscale * (toFloat level) - distance + coinDiameter / 2.0)
 
-  in coinDiameter |> circle |> filled model.color |> move position 
+  in coinDiameter |> circle |> filled coin.color |> move position 
 
 drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
@@ -90,27 +90,27 @@ addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
-update : (Int, Int) -> (Model, Dict Int Int) -> (Model, Dict Int Int)
-update (_, height) (model, bins) = 
-  case model.motion of
+update : (Int, Int) -> (Coin, Dict Int Int) -> (Coin, Dict Int Int)
+update (_, height) (coin, bins) = 
+  case coin.motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < levelCount) then
-           ({model | motion = Galton newLevel newShift newSeed}, bins)
+           ({coin | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
            let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
                floor = maxDrop - toFloat (coinsInBin newShift bins) * (coinDiameter*2 + 1)
-           in ({model | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
+           in ({coin | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
       in if (newDistance < floor) then
-           ({model | motion = Falling shift newDistance (velocity + 1) floor}, bins)
+           ({coin | motion = Falling shift newDistance (velocity + 1) floor}, bins)
          else -- transtion to landed
-           ({model | motion = Landed shift floor}, bins)
+           ({coin | motion = Landed shift floor}, bins)
 
-    Landed _ _ -> (model, bins)
+    Landed _ _ -> (coin, bins)
 

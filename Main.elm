@@ -12,7 +12,7 @@ import String exposing (toInt)
 import Result exposing (withDefault)
 
 type alias Model = 
-  { coins : List Coin.Model
+  { coins : List Coin.Coin
   , bins : Dict Int Int
   , dimensions : (Int,Int)
   , dropCountString : String
