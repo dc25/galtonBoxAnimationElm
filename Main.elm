@@ -20,7 +20,7 @@ topMargin = 30
 bottomMargin = 30
 levelCount = 12
 dropCount = 90
-coinDiameter = hscale/ 2.0
+radius = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
@@ -47,9 +47,9 @@ drawCoin (Coin motion color) =
       floatShift = toFloat shift
       position = 
         (             hscale * floatShift
-        , dropLevel - vscale * (toFloat level) - distance + coinDiameter / 2.0)
+        , dropLevel - vscale * (toFloat level) - distance + radius / 2.0)
 
-  in coinDiameter |> circle |> filled color |> move position 
+  in radius |> circle |> filled color |> move position 
 
 drawGaltonBox : List Form
 drawGaltonBox = 
@@ -106,7 +106,7 @@ updateCoin (Coin motion color, bins) =
            (Coin (Galton newLevel newShift newSeed) color, bins)
          else -- transition to falling
            let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
-               floor = maxDrop - toFloat (coinsInBin newShift bins) * (coinDiameter*2 + 1)
+               floor = maxDrop - toFloat (coinsInBin newShift bins) * (radius*2 + 1)
            in (Coin (Falling newShift -((vscale)/2.0) 10 floor) color, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
