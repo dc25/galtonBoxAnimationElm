@@ -136,7 +136,7 @@ init =
 type Action = Drop Int | Tick | SetCountString String | Go
 
 drop : Signal Action 
-drop = Signal.map (\t -> Drop (truncate t)) (every 200)
+drop = Signal.map (\t -> Drop (truncate (t*1000))) (every 200)
 
 tick : Signal Action 
 tick  = Signal.map (\t -> Tick) (every 50)
