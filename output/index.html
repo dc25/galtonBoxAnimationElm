@@ -10860,38 +10860,45 @@ Elm.StartApp.make = function (_elm) {
    var App = F3(function (a,b,c) {    return {html: a,model: b,tasks: c};});
    var Config = F4(function (a,b,c,d) {    return {init: a,update: b,view: c,inputs: d};});
    return _elm.StartApp.values = {_op: _op,start: start,Config: Config,App: App};
-};Elm.Main = Elm.Main || {};
-Elm.Main.make = function (_elm) {
+};Elm.Const = Elm.Const || {};
+Elm.Const.make = function (_elm) {
    "use strict";
-   _elm.Main = _elm.Main || {};
-   if (_elm.Main.values) return _elm.Main.values;
+   _elm.Const = _elm.Const || {};
+   if (_elm.Const.values) return _elm.Const.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var levelCount = 12;
+   var margin = 30;
+   var hscale = 10.0;
+   var vscale = hscale * 2;
+   var radius = hscale / 2.0;
+   var height = 600;
+   var width = 500;
+   return _elm.Const.values = {_op: _op,width: width,height: height,hscale: hscale,vscale: vscale,margin: margin,levelCount: levelCount,radius: radius};
+};Elm.Coin = Elm.Coin || {};
+Elm.Coin.make = function (_elm) {
+   "use strict";
+   _elm.Coin = _elm.Coin || {};
+   if (_elm.Coin.values) return _elm.Coin.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
+   $Const = Elm.Const.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $Effects = Elm.Effects.make(_elm),
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Random = Elm.Random.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $StartApp = Elm.StartApp.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Time = Elm.Time.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var Go = {ctor: "Go"};
-   var SetCountString = function (a) {    return {ctor: "SetCountString",_0: a};};
-   var Tick = {ctor: "Tick"};
-   var tick = A2($Signal.map,function (t) {    return Tick;},$Time.every(50));
-   var Drop = function (a) {    return {ctor: "Drop",_0: a};};
-   var drop = A2($Signal.map,function (t) {    return Drop($Basics.truncate(t * 1000));},$Time.every(200));
-   var init = {coins: _U.list([]),bins: $Dict.empty,countString: "",count: 0,started: false};
-   var Model = F5(function (a,b,c,d,e) {    return {coins: a,bins: b,countString: c,count: d,started: e};});
    var coinsInBin = F2(function (binNumber,bins) {
       var _p0 = A2($Dict.get,binNumber,bins);
       if (_p0.ctor === "Nothing") {
@@ -10901,54 +10908,19 @@ Elm.Main.make = function (_elm) {
          }
    });
    var addToBins = F2(function (binNumber,bins) {    return A3($Dict.insert,binNumber,A2(coinsInBin,binNumber,bins) + 1,bins);});
-   var colorCycle = function (i) {
-      var _p1 = A2($Basics._op["%"],i,3);
-      switch (_p1)
-      {case 0: return $Color.red;
-         case 1: return $Color.blue;
-         default: return $Color.green;}
-   };
-   var Coin = F2(function (a,b) {    return {ctor: "Coin",_0: a,_1: b};});
-   var Landed = F2(function (a,b) {    return {ctor: "Landed",_0: a,_1: b};});
-   var Falling = F4(function (a,b,c,d) {    return {ctor: "Falling",_0: a,_1: b,_2: c,_3: d};});
-   var Galton = F3(function (a,b,c) {    return {ctor: "Galton",_0: a,_1: b,_2: c};});
-   var initCoin = function (indx) {    return A2(Coin,A3(Galton,0,0,$Random.initialSeed(indx)),colorCycle(indx));};
-   var levelCount = 12;
-   var margin = 30;
-   var hscale = 10.0;
-   var vscale = hscale * 2;
-   var radius = hscale / 2.0;
-   var height = 600;
-   var drawCoin = function (_p2) {
-      var _p3 = _p2;
-      var _p4 = function () {
-         var _p5 = _p3._0;
-         switch (_p5.ctor)
-         {case "Galton": return {ctor: "_Tuple3",_0: _p5._0,_1: _p5._1,_2: 0};
-            case "Falling": return {ctor: "_Tuple3",_0: levelCount,_1: _p5._0,_2: _p5._1};
-            default: return {ctor: "_Tuple3",_0: levelCount,_1: _p5._0,_2: _p5._1};}
-      }();
-      var level = _p4._0;
-      var shift = _p4._1;
-      var distance = _p4._2;
-      var floatShift = $Basics.toFloat(shift);
-      var dropLevel = $Basics.toFloat((height / 2 | 0) - margin);
-      var position = {ctor: "_Tuple2",_0: hscale * floatShift,_1: dropLevel - vscale * $Basics.toFloat(level) - distance + radius / 2.0};
-      return A2($Graphics$Collage.move,position,A2($Graphics$Collage.filled,_p3._1,$Graphics$Collage.circle(radius)));
-   };
    var drawGaltonBox = function () {
-      var apex = $Basics.toFloat((height / 2 | 0) - margin);
+      var apex = $Basics.toFloat(($Const.height / 2 | 0) - $Const.margin);
       var peg = A2($Graphics$Collage.filled,
       $Color.black,
       $Graphics$Collage.polygon(_U.list([{ctor: "_Tuple2",_0: 0,_1: 0},{ctor: "_Tuple2",_0: -4,_1: -8},{ctor: "_Tuple2",_0: 4,_1: -8}])));
-      var levels = _U.range(0,levelCount - 1);
+      var levels = _U.range(0,$Const.levelCount - 1);
       var doubles = A2($List.map,function (n) {    return 2 * n;},levels);
       var sequences = function () {
-         var _p6 = $List.tail(A3($List.scanl,F2(function (x,y) {    return A2($List._op["::"],x,y);}),_U.list([]),doubles));
-         if (_p6.ctor === "Nothing") {
+         var _p1 = $List.tail(A3($List.scanl,F2(function (x,y) {    return A2($List._op["::"],x,y);}),_U.list([]),doubles));
+         if (_p1.ctor === "Nothing") {
                return _U.list([]);
             } else {
-               return _p6._0;
+               return _p1._0;
             }
       }();
       var galtonCoords = $List.concat(A3($List.map2,
@@ -10956,12 +10928,42 @@ Elm.Main.make = function (_elm) {
       sequences,
       levels));
       return A2($List.map,
-      function (_p7) {
-         var _p8 = _p7;
-         return A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: hscale * $Basics.toFloat(_p8._0),_1: apex - vscale * $Basics.toFloat(_p8._1)},peg);
+      function (_p2) {
+         var _p3 = _p2;
+         return A2($Graphics$Collage.move,{ctor: "_Tuple2",_0: $Const.hscale * $Basics.toFloat(_p3._0),_1: apex - $Const.vscale * $Basics.toFloat(_p3._1)},peg);
       },
       galtonCoords);
    }();
+   var drawCoin = function (_p4) {
+      var _p5 = _p4;
+      var _p6 = function () {
+         var _p7 = _p5._0;
+         switch (_p7.ctor)
+         {case "InBox": return {ctor: "_Tuple3",_0: _p7._0,_1: _p7._1,_2: 0};
+            case "Falling": return {ctor: "_Tuple3",_0: $Const.levelCount,_1: _p7._0,_2: _p7._1};
+            default: return {ctor: "_Tuple3",_0: $Const.levelCount,_1: _p7._0,_2: _p7._1};}
+      }();
+      var level = _p6._0;
+      var shift = _p6._1;
+      var distance = _p6._2;
+      var dropLevel = $Basics.toFloat(($Const.height / 2 | 0) - $Const.margin);
+      var position = {ctor: "_Tuple2"
+                     ,_0: $Const.hscale * $Basics.toFloat(shift)
+                     ,_1: dropLevel - $Const.vscale * $Basics.toFloat(level) - distance + $Const.radius / 2.0};
+      return A2($Graphics$Collage.move,position,A2($Graphics$Collage.filled,_p5._1,$Graphics$Collage.circle($Const.radius)));
+   };
+   var colorCycle = function (i) {
+      var _p8 = A2($Basics._op["%"],i,3);
+      switch (_p8)
+      {case 0: return $Color.red;
+         case 1: return $Color.blue;
+         default: return $Color.green;}
+   };
+   var Coin = F2(function (a,b) {    return {ctor: "Coin",_0: a,_1: b};});
+   var Landed = F2(function (a,b) {    return {ctor: "Landed",_0: a,_1: b};});
+   var Falling = F4(function (a,b,c,d) {    return {ctor: "Falling",_0: a,_1: b,_2: c,_3: d};});
+   var InBox = F3(function (a,b,c) {    return {ctor: "InBox",_0: a,_1: b,_2: c};});
+   var initCoin = function (indx) {    return A2(Coin,A3(InBox,0,0,$Random.initialSeed(indx)),colorCycle(indx));};
    var updateCoin = function (_p9) {
       var _p10 = _p9;
       var _p18 = _p10._0._0;
@@ -10969,16 +10971,16 @@ Elm.Main.make = function (_elm) {
       var _p16 = _p10._1;
       var _p11 = _p18;
       switch (_p11.ctor)
-      {case "Galton": var newLevel = _p11._0 + 1;
+      {case "InBox": var newLevel = _p11._0 + 1;
            var deltaShift = A2($Random.map,function (b) {    return b ? 1 : -1;},$Random.bool);
            var _p12 = A2($Random.generate,deltaShift,_p11._2);
            var delta = _p12._0;
            var newSeed = _p12._1;
            var newShift = _p11._1 + delta;
-           if (_U.cmp(newLevel,levelCount) < 0) return {ctor: "_Tuple2",_0: A2(Coin,A3(Galton,newLevel,newShift,newSeed),_p17),_1: _p16}; else {
-                 var maxDrop = $Basics.toFloat(height - 2 * margin) - $Basics.toFloat(levelCount) * vscale;
-                 var floor = maxDrop - $Basics.toFloat(A2(coinsInBin,newShift,_p16)) * (radius * 2 + 1);
-                 return {ctor: "_Tuple2",_0: A2(Coin,A4(Falling,newShift,0 - vscale / 2.0,10,floor),_p17),_1: A2(addToBins,newShift,_p16)};
+           if (_U.cmp(newLevel,$Const.levelCount) < 0) return {ctor: "_Tuple2",_0: A2(Coin,A3(InBox,newLevel,newShift,newSeed),_p17),_1: _p16}; else {
+                 var maxDrop = $Basics.toFloat($Const.height - 2 * $Const.margin) - $Basics.toFloat($Const.levelCount) * $Const.vscale;
+                 var floor = maxDrop - $Basics.toFloat(A2(coinsInBin,newShift,_p16)) * ($Const.radius * 2 + 1);
+                 return {ctor: "_Tuple2",_0: A2(Coin,A4(Falling,newShift,0 - $Const.vscale / 2.0,10,floor),_p17),_1: A2(addToBins,newShift,_p16)};
               }
          case "Falling": var _p15 = _p11._2;
            var _p14 = _p11._0;
@@ -10991,69 +10993,8 @@ Elm.Main.make = function (_elm) {
                                                                                                                                            ,_1: _p16};
          default: return {ctor: "_Tuple2",_0: A2(Coin,_p18,_p17),_1: _p16};}
    };
-   var update = F2(function (action,model) {
-      var _p19 = action;
-      switch (_p19.ctor)
-      {case "Go": var count = A2($Result.withDefault,0,$String.toInt(model.countString));
-           var started = _U.cmp(count,0) > 0;
-           var countString = started ? "" : model.countString;
-           return {ctor: "_Tuple2",_0: _U.update(model,{count: count,countString: countString,started: started}),_1: $Effects.none};
-         case "SetCountString": return {ctor: "_Tuple2",_0: _U.update(model,{countString: _p19._0}),_1: $Effects.none};
-         case "Drop": if (model.started && _U.cmp(model.count,0) > 0) {
-                 var newcount = model.count - 1;
-                 return {ctor: "_Tuple2"
-                        ,_0: _U.update(model,{count: newcount,started: _U.cmp(newcount,0) > 0,coins: A2($List._op["::"],initCoin(_p19._0),model.coins)})
-                        ,_1: $Effects.none};
-              } else return {ctor: "_Tuple2",_0: model,_1: $Effects.none};
-         default: var _p20 = A3($List.foldr,
-           F2(function (coin,_p21) {
-              var _p22 = _p21;
-              var _p23 = updateCoin({ctor: "_Tuple2",_0: coin,_1: _p22._1});
-              var updatedCoin = _p23._0;
-              var updatedBins = _p23._1;
-              return {ctor: "_Tuple2",_0: A2($List._op["::"],updatedCoin,_p22._0),_1: updatedBins};
-           }),
-           {ctor: "_Tuple2",_0: _U.list([]),_1: model.bins},
-           model.coins);
-           var updatedCoins = _p20._0;
-           var updatedBins = _p20._1;
-           return {ctor: "_Tuple2",_0: _U.update(model,{coins: updatedCoins,bins: updatedBins}),_1: $Effects.none};}
-   });
-   var width = 500;
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.input,
-              _U.list([$Html$Attributes.placeholder("How many?")
-                      ,function () {
-                         var showString = model.started ? $Basics.toString(model.count) : model.countString;
-                         return $Html$Attributes.value(showString);
-                      }()
-                      ,A3($Html$Events.on,"input",$Html$Events.targetValue,function (_p24) {    return A2($Signal.message,address,SetCountString(_p24));})
-                      ,$Html$Attributes.disabled(model.started)
-                      ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "height",_1: "20px"}]))]),
-              _U.list([]))
-              ,A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,Go)
-                      ,$Html$Attributes.disabled(model.started)
-                      ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "height",_1: "20px"}]))]),
-              _U.list([$Html.text("GO!")]))
-              ,function () {
-                 var coinForms = A2($List.map,drawCoin,model.coins);
-                 return $Html.fromElement(A3($Graphics$Collage.collage,width,height,A2($Basics._op["++"],coinForms,drawGaltonBox)));
-              }()]));
-   });
-   var app = $StartApp.start({init: {ctor: "_Tuple2",_0: init,_1: $Effects.none},update: update,view: view,inputs: _U.list([drop,tick])});
-   var main = app.html;
-   return _elm.Main.values = {_op: _op
-                             ,width: width
-                             ,height: height
-                             ,hscale: hscale
-                             ,vscale: vscale
-                             ,margin: margin
-                             ,levelCount: levelCount
-                             ,radius: radius
-                             ,Galton: Galton
+   return _elm.Coin.values = {_op: _op
+                             ,InBox: InBox
                              ,Falling: Falling
                              ,Landed: Landed
                              ,Coin: Coin
@@ -11063,7 +11004,93 @@ Elm.Main.make = function (_elm) {
                              ,drawGaltonBox: drawGaltonBox
                              ,coinsInBin: coinsInBin
                              ,addToBins: addToBins
-                             ,updateCoin: updateCoin
+                             ,updateCoin: updateCoin};
+};Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values) return _elm.Main.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Coin = Elm.Coin.make(_elm),
+   $Const = Elm.Const.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "Go": var count = A2($Result.withDefault,0,$String.toInt(model.countString));
+           var started = _U.cmp(count,0) > 0;
+           var countString = started ? "" : model.countString;
+           return {ctor: "_Tuple2",_0: _U.update(model,{count: count,countString: countString,started: started}),_1: $Effects.none};
+         case "SetCountString": return {ctor: "_Tuple2",_0: _U.update(model,{countString: _p0._0}),_1: $Effects.none};
+         case "Drop": if (model.started && _U.cmp(model.count,0) > 0) {
+                 var newcount = model.count - 1;
+                 return {ctor: "_Tuple2"
+                        ,_0: _U.update(model,{count: newcount,started: _U.cmp(newcount,0) > 0,coins: A2($List._op["::"],$Coin.initCoin(_p0._0),model.coins)})
+                        ,_1: $Effects.none};
+              } else return {ctor: "_Tuple2",_0: model,_1: $Effects.none};
+         default: var _p1 = A3($List.foldr,
+           F2(function (coin,_p2) {
+              var _p3 = _p2;
+              var _p4 = $Coin.updateCoin({ctor: "_Tuple2",_0: coin,_1: _p3._1});
+              var updatedCoin = _p4._0;
+              var updatedBins = _p4._1;
+              return {ctor: "_Tuple2",_0: A2($List._op["::"],updatedCoin,_p3._0),_1: updatedBins};
+           }),
+           {ctor: "_Tuple2",_0: _U.list([]),_1: model.bins},
+           model.coins);
+           var updatedCoins = _p1._0;
+           var updatedBins = _p1._1;
+           return {ctor: "_Tuple2",_0: _U.update(model,{coins: updatedCoins,bins: updatedBins}),_1: $Effects.none};}
+   });
+   var Go = {ctor: "Go"};
+   var SetCountString = function (a) {    return {ctor: "SetCountString",_0: a};};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.placeholder("How many?")
+                      ,function () {
+                         var showString = model.started ? $Basics.toString(model.count) : model.countString;
+                         return $Html$Attributes.value(showString);
+                      }()
+                      ,A3($Html$Events.on,"input",$Html$Events.targetValue,function (_p5) {    return A2($Signal.message,address,SetCountString(_p5));})
+                      ,$Html$Attributes.disabled(model.started)
+                      ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "height",_1: "20px"}]))]),
+              _U.list([]))
+              ,A2($Html.button,
+              _U.list([A2($Html$Events.onClick,address,Go)
+                      ,$Html$Attributes.disabled(model.started)
+                      ,$Html$Attributes.style(_U.list([{ctor: "_Tuple2",_0: "height",_1: "20px"}]))]),
+              _U.list([$Html.text("GO!")]))
+              ,function () {
+                 var coinForms = A2($List.map,$Coin.drawCoin,model.coins);
+                 return $Html.fromElement(A3($Graphics$Collage.collage,$Const.width,$Const.height,A2($Basics._op["++"],coinForms,$Coin.drawGaltonBox)));
+              }()]));
+   });
+   var Tick = {ctor: "Tick"};
+   var tick = A2($Signal.map,function (t) {    return Tick;},$Time.every(50));
+   var Drop = function (a) {    return {ctor: "Drop",_0: a};};
+   var drop = A2($Signal.map,function (t) {    return Drop($Basics.truncate(t * 1000));},$Time.every(200));
+   var init = {coins: _U.list([]),bins: $Dict.empty,countString: "",count: 0,started: false};
+   var app = $StartApp.start({init: {ctor: "_Tuple2",_0: init,_1: $Effects.none},update: update,view: view,inputs: _U.list([drop,tick])});
+   var main = app.html;
+   var Model = F5(function (a,b,c,d,e) {    return {coins: a,bins: b,countString: c,count: d,started: e};});
+   return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,init: init
                              ,Drop: Drop
