@@ -6,9 +6,9 @@ import Color exposing (Color, black, red, blue, green)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 import Const
 
-type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
+type State = InBox Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
-type Coin = Coin Motion Color
+type Coin = Coin State Color
 
 colorCycle : Int -> Color
 colorCycle i =
@@ -18,14 +18,14 @@ colorCycle i =
     _ -> green
 
 initCoin : Int -> Coin
-initCoin indx = Coin (Galton 0 0 (initialSeed indx)) (colorCycle indx)
+initCoin indx = Coin (InBox 0 0 (initialSeed indx)) (colorCycle indx)
 
 drawCoin : Coin -> Form
-drawCoin (Coin motion color) = 
+drawCoin (Coin state color) = 
   let dropLevel = toFloat (Const.height//2 - Const.margin)
       (level, shift, distance) = 
-        case motion of
-          Galton level shift seed -> (level, shift, 0)
+        case state of
+          InBox level shift seed -> (level, shift, 0)
           Falling shift distance _ _-> (Const.levelCount, shift, distance)
           Landed shift distance -> (Const.levelCount, shift, distance)
       position = 
@@ -78,15 +78,15 @@ addToBins binNumber bins =
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
 updateCoin : (Coin, Dict Int Int) -> (Coin, Dict Int Int)
-updateCoin (Coin motion color, bins) = 
-  case motion of
-    Galton level shift seed ->
+updateCoin (Coin state color, bins) = 
+  case state of
+    InBox level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < Const.levelCount) then
-           (Coin (Galton newLevel newShift newSeed) color, bins)
+           (Coin (InBox newLevel newShift newSeed) color, bins)
          else -- transition to falling
            let maxDrop = toFloat (Const.height - 2 * Const.margin) - toFloat (Const.levelCount) * Const.vscale
                floor = maxDrop - toFloat (coinsInBin newShift bins) * (Const.radius*2 + 1)
@@ -99,7 +99,7 @@ updateCoin (Coin motion color, bins) =
          else -- transtion to landed
            (Coin (Landed shift floor) color, bins)
 
-    Landed _ _ -> (Coin motion color, bins)
+    Landed _ _ -> (Coin state color, bins)
 
 
 
