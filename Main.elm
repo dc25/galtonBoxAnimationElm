@@ -10,15 +10,7 @@ import String exposing (toInt)
 import Result exposing (withDefault)
 import Color exposing (Color, black, red, blue, green)
 import Random exposing (Seed, bool, generate, initialSeed, map)
-
--- Display related parameters.
-width = 500
-height = 600
-hscale = 10.0
-vscale = hscale * 2
-margin = 30
-levelCount = 12
-radius = hscale/ 2.0
+import Const
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
@@ -36,22 +28,21 @@ initCoin indx = Coin (Galton 0 0 (initialSeed indx)) (colorCycle indx)
 
 drawCoin : Coin -> Form
 drawCoin (Coin motion color) = 
-  let dropLevel = toFloat (height//2 - margin)
+  let dropLevel = toFloat (Const.height//2 - Const.margin)
       (level, shift, distance) = 
         case motion of
           Galton level shift seed -> (level, shift, 0)
-          Falling shift distance _ _-> (levelCount, shift, distance)
-          Landed shift distance -> (levelCount, shift, distance)
-      floatShift = toFloat shift
+          Falling shift distance _ _-> (Const.levelCount, shift, distance)
+          Landed shift distance -> (Const.levelCount, shift, distance)
       position = 
-        (             hscale * floatShift
-        , dropLevel - vscale * (toFloat level) - distance + radius / 2.0)
+        (             Const.hscale * toFloat shift
+        , dropLevel - Const.vscale * (toFloat level) - distance + Const.radius / 2.0)
 
-  in radius |> circle |> filled color |> move position 
+  in Const.radius |> circle |> filled color |> move position 
 
 drawGaltonBox : List Form
 drawGaltonBox = 
-  let levels = [0..levelCount-1]
+  let levels = [0..Const.levelCount-1]
  
       -- doubles :
       -- [0,2,4,6,8...]
@@ -78,9 +69,9 @@ drawGaltonBox =
 
       peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
 
-      apex = toFloat (height//2 - margin)
+      apex = toFloat (Const.height//2 - Const.margin)
 
-  in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
+  in List.map (\(x,y) -> move (Const.hscale*toFloat x,  apex - Const.vscale*toFloat y) peg) galtonCoords
 
 coinsInBin : Int -> Dict Int Int -> Int
 coinsInBin binNumber bins = 
@@ -100,12 +91,12 @@ updateCoin (Coin motion color, bins) =
           (delta, newSeed) = generate deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
-      in if (newLevel < levelCount) then
+      in if (newLevel < Const.levelCount) then
            (Coin (Galton newLevel newShift newSeed) color, bins)
          else -- transition to falling
-           let maxDrop = toFloat (height - 2 * margin) - toFloat (levelCount) * vscale
-               floor = maxDrop - toFloat (coinsInBin newShift bins) * (radius*2 + 1)
-           in (Coin (Falling newShift -((vscale)/2.0) 10 floor) color, addToBins newShift bins)
+           let maxDrop = toFloat (Const.height - 2 * Const.margin) - toFloat (Const.levelCount) * Const.vscale
+               floor = maxDrop - toFloat (coinsInBin newShift bins) * (Const.radius*2 + 1)
+           in (Coin (Falling newShift -((Const.vscale)/2.0) 10 floor) color, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
       let newDistance = distance + velocity
@@ -196,7 +187,7 @@ view address model =
         [ text "GO!" ]
 
      , let coinForms = (List.map (drawCoin) model.coins)
-       in collage width height (coinForms ++ drawGaltonBox) |> fromElement 
+       in collage Const.width Const.height (coinForms ++ drawGaltonBox) |> fromElement 
     ]
 
 app : StartApp.App Model
