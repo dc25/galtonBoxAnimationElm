@@ -102,7 +102,7 @@ update (_, height) (model, bins) =
            ({model | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
            let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
-               floor = maxDrop - toFloat (ballsInBin newShift bins) * (ballDiameter + 1)* 2 
+               floor = maxDrop - toFloat (ballsInBin newShift bins) * (ballDiameter*2 + 1)
            in ({model | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 
