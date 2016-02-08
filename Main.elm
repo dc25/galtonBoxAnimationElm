@@ -16,10 +16,8 @@ width = 500
 height = 600
 hscale = 10.0
 vscale = hscale * 2
-topMargin = 30
-bottomMargin = 30
+margin = 30
 levelCount = 12
-dropCount = 90
 radius = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
@@ -38,7 +36,7 @@ initCoin indx = Coin (Galton 0 0 (initialSeed indx)) (colorCycle indx)
 
 drawCoin : Coin -> Form
 drawCoin (Coin motion color) = 
-  let dropLevel = toFloat (height//2 - topMargin)
+  let dropLevel = toFloat (height//2 - margin)
       (level, shift, distance) = 
         case motion of
           Galton level shift seed -> (level, shift, 0)
@@ -80,7 +78,7 @@ drawGaltonBox =
 
        peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
 
-       apex = toFloat (height//2 - topMargin)
+       apex = toFloat (height//2 - margin)
 
    in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
 
@@ -105,7 +103,7 @@ updateCoin (Coin motion color, bins) =
       in if (newLevel < levelCount) then
            (Coin (Galton newLevel newShift newSeed) color, bins)
          else -- transition to falling
-           let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
+           let maxDrop = toFloat (height - 2 * margin) - toFloat (levelCount) * vscale
                floor = maxDrop - toFloat (coinsInBin newShift bins) * (radius*2 + 1)
            in (Coin (Falling newShift -((vscale)/2.0) 10 floor) color, addToBins newShift bins)
 
@@ -121,8 +119,8 @@ updateCoin (Coin motion color, bins) =
 type alias Model = 
   { coins : List Coin
   , bins : Dict Int Int
-  , dropCountString : String
-  , dropCount : Int
+  , countString : String
+  , count : Int
   , started : Bool
   }
 
@@ -130,8 +128,8 @@ init : Model
 init =
   { coins = []
   , bins = Dict.empty
-  , dropCountString = ""
-  , dropCount = 0
+  , countString = ""
+  , count = 0
   , started = False
   }
 
@@ -147,20 +145,20 @@ update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
       Go ->
-        let dropCount = toInt model.dropCountString |> withDefault 0 
-            started = dropCount > 0
-            dropCountString = if (started) then "" else model.dropCountString
-        in ({model | dropCount = dropCount, dropCountString = dropCountString, started = started}, Effects.none)
+        let count = toInt model.countString |> withDefault 0 
+            started = count > 0
+            countString = if (started) then "" else model.countString
+        in ({model | count = count, countString = countString, started = started}, Effects.none)
 
       SetCountString count -> 
-        ({ model | dropCountString = count}, Effects.none)
+        ({ model | countString = count}, Effects.none)
 
       Drop n -> 
-        if (model.started && model.dropCount > 0) then
-            let newDropCount = model.dropCount - 1
+        if (model.started && model.count > 0) then
+            let newcount = model.count - 1
             in ({ model | 
-                  dropCount = newDropCount, 
-                  started = newDropCount > 0,
+                  count = newcount, 
+                  started = newcount > 0,
                   coins = initCoin n :: model.coins}, Effects.none)
         else
            (model, Effects.none)
@@ -181,8 +179,8 @@ view address model =
     [ input
         [ placeholder "How many?"
         , let showString = if (model.started)
-                           then toString model.dropCount
-                           else model.dropCountString
+                           then toString model.count
+                           else model.countString
           in value showString
         , on "input" targetValue (Signal.message address << SetCountString)
         , disabled model.started
