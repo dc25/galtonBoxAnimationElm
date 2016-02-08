@@ -70,7 +70,7 @@ update action model =
 
       Tick -> 
         -- foldr to execute update, append to balls, replace bins
-       let (updatedBalls, updatedBins) =
+        let (updatedBalls, updatedBins) =
           List.foldr (\ball (ballList, bins) -> 
                          let (updatedBall, updatedBins) = Ball.update model.dimensions (ball, bins) 
                          in (updatedBall :: ballList, updatedBins))
