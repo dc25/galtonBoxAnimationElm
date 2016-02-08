@@ -6,7 +6,7 @@ import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form)
 import Ball exposing (init, update, viewAsForm, drawGaltonBox)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
-import Html.Attributes exposing (placeholder, value, style)
+import Html.Attributes exposing (placeholder, value, style, disabled)
 import Html.Events exposing (on, targetValue, onClick)
 import Dict exposing (Dict)
 import String exposing (toInt)
@@ -81,36 +81,29 @@ update action model =
 view : Signal.Address Action -> Model -> Html
 view address model = 
   div []
-    ([ input
+    [ input
         [ placeholder "How many?"
         , let showString = if (model.started)
                            then toString model.dropCount
                            else model.dropCountString
           in value showString
         , on "input" targetValue (Signal.message address << SetCountString)
-        , myStyle
+        , disabled model.started
+        , style [ ("height", "20px") ]
         ]
-        [],
+        []
 
-       button
-        [ onClick address Go ]
+     , button
+        [ onClick address Go 
+        , disabled model.started
+        , style [ ("height", "20px") ]
+        ]
         [ text "GO!" ]
-     ] ++ 
-     [ 
-       let dim = model.dimensions
+
+     , let dim = model.dimensions
            (width, height) = dim
            ballForms = (List.map (Ball.viewAsForm dim) model.balls)
        in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
-     ])
-
-myStyle : Attribute
-myStyle =
-  style
-    [ ("width", "10%")
-    , ("height", "20px")
-    , ("padding", "0 0 0 0")
-    , ("font-size", "1em")
-    , ("text-align", "left")
     ]
 
 app : StartApp.App Model
