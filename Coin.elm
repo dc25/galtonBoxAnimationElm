@@ -1,4 +1,4 @@
-module Ball where
+module Coin where
 
 import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (filled, move, Form, circle, polygon)
@@ -13,7 +13,7 @@ topMargin = 30
 bottomMargin = 30
 levelCount = 12
 dropCount = 90
-ballDiameter = hscale/ 2.0
+coinDiameter = hscale/ 2.0
 
 type Motion = Galton Int Int Seed | Falling Int Float Float Float | Landed Int Float
 
@@ -43,9 +43,9 @@ viewAsForm (_, height) model =
       floatShift = toFloat shift
       position = 
         (             hscale * floatShift
-        , dropLevel - vscale * (toFloat level) - distance + ballDiameter / 2.0)
+        , dropLevel - vscale * (toFloat level) - distance + coinDiameter / 2.0)
 
-  in ballDiameter |> circle |> filled model.color |> move position 
+  in coinDiameter |> circle |> filled model.color |> move position 
 
 drawGaltonBox : (Int, Int) -> List Form
 drawGaltonBox (width, height) = 
@@ -80,15 +80,15 @@ drawGaltonBox (width, height) =
 
    in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
 
-ballsInBin : Int -> Dict Int Int -> Int
-ballsInBin binNumber bins = 
+coinsInBin : Int -> Dict Int Int -> Int
+coinsInBin binNumber bins = 
   case get binNumber bins of
     Nothing -> 0
     Just n -> n
 
 addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
-  insert binNumber (ballsInBin binNumber bins + 1) bins
+  insert binNumber (coinsInBin binNumber bins + 1) bins
 
 update : (Int, Int) -> (Model, Dict Int Int) -> (Model, Dict Int Int)
 update (_, height) (model, bins) = 
@@ -102,7 +102,7 @@ update (_, height) (model, bins) =
            ({model | motion = Galton newLevel newShift newSeed}, bins)
          else -- transition to falling
            let maxDrop = toFloat (height - topMargin - bottomMargin) - toFloat (levelCount) * vscale
-               floor = maxDrop - toFloat (ballsInBin newShift bins) * (ballDiameter*2 + 1)
+               floor = maxDrop - toFloat (coinsInBin newShift bins) * (coinDiameter*2 + 1)
            in ({model | motion = Falling newShift -((vscale)/2.0) 10 floor}, addToBins newShift bins)
 
     Falling shift distance velocity floor -> 

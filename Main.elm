@@ -3,7 +3,7 @@ import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form)
-import Ball exposing (init, update, viewAsForm, drawGaltonBox)
+import Coin exposing (init, update, viewAsForm, drawGaltonBox)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
 import Html.Attributes exposing (placeholder, value, style, disabled)
 import Html.Events exposing (on, targetValue, onClick)
@@ -12,7 +12,7 @@ import String exposing (toInt)
 import Result exposing (withDefault)
 
 type alias Model = 
-  { balls : List Ball.Model
+  { coins : List Coin.Model
   , bins : Dict Int Int
   , dimensions : (Int,Int)
   , dropCountString : String
@@ -22,7 +22,7 @@ type alias Model =
 
 init : Model
 init =
-  { balls = []
+  { coins = []
   , bins = Dict.empty
   , dimensions = (500,600)
   , dropCountString = ""
@@ -56,19 +56,19 @@ update action model =
             in ({ model | 
                   dropCount = newDropCount, 
                   started = newDropCount > 0,
-                  balls = Ball.init n :: model.balls}, Effects.none)
+                  coins = Coin.init n :: model.coins}, Effects.none)
         else
            (model, Effects.none)
 
       Tick -> 
-        -- foldr to execute update, append to balls, replace bins
-        let (updatedBalls, updatedBins) =
-          List.foldr (\ball (ballList, bins) -> 
-                         let (updatedBall, updatedBins) = Ball.update model.dimensions (ball, bins) 
-                         in (updatedBall :: ballList, updatedBins))
+        -- foldr to execute update, append to coins, replace bins
+        let (updatedCoins, updatedBins) =
+          List.foldr (\coin (coinList, bins) -> 
+                         let (updatedCoin, updatedBins) = Coin.update model.dimensions (coin, bins) 
+                         in (updatedCoin :: coinList, updatedBins))
                      ([], model.bins)
-                     model.balls
-        in ({ model | balls = updatedBalls, bins = updatedBins}, Effects.none)
+                     model.coins
+        in ({ model | coins = updatedCoins, bins = updatedBins}, Effects.none)
 
 view : Signal.Address Action -> Model -> Html
 view address model = 
@@ -94,8 +94,8 @@ view address model =
 
      , let dim = model.dimensions
            (width, height) = dim
-           ballForms = (List.map (Ball.viewAsForm dim) model.balls)
-       in collage width height (ballForms ++ drawGaltonBox dim) |> fromElement 
+           coinForms = (List.map (Coin.viewAsForm dim) model.coins)
+       in collage width height (coinForms ++ drawGaltonBox dim) |> fromElement 
     ]
 
 app : StartApp.App Model
