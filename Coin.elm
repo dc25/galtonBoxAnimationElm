@@ -29,8 +29,8 @@ colorCycle i =
         1 -> blue
         _ -> green
 
-init : Int -> Coin
-init indx = {motion = Galton 0 0 (initialSeed indx), color=colorCycle indx}
+initCoin : Int -> Coin
+initCoin indx = {motion = Galton 0 0 (initialSeed indx), color=colorCycle indx}
 
 viewAsForm : (Int, Int) -> Coin -> Form
 viewAsForm (_, height) coin = 
@@ -90,8 +90,8 @@ addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
-update : (Int, Int) -> (Coin, Dict Int Int) -> (Coin, Dict Int Int)
-update (_, height) (coin, bins) = 
+updateCoin : (Int, Int) -> (Coin, Dict Int Int) -> (Coin, Dict Int Int)
+updateCoin (_, height) (coin, bins) = 
   case coin.motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool

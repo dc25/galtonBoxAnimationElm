@@ -3,7 +3,7 @@ import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form)
-import Coin exposing (init, update, viewAsForm, drawGaltonBox)
+import Coin exposing (initCoin, updateCoin, viewAsForm, drawGaltonBox)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
 import Html.Attributes exposing (placeholder, value, style, disabled)
 import Html.Events exposing (on, targetValue, onClick)
@@ -56,7 +56,7 @@ update action model =
             in ({ model | 
                   dropCount = newDropCount, 
                   started = newDropCount > 0,
-                  coins = Coin.init n :: model.coins}, Effects.none)
+                  coins = Coin.initCoin n :: model.coins}, Effects.none)
         else
            (model, Effects.none)
 
@@ -64,7 +64,7 @@ update action model =
         -- foldr to execute update, append to coins, replace bins
         let (updatedCoins, updatedBins) =
           List.foldr (\coin (coinList, bins) -> 
-                         let (updatedCoin, updatedBins) = Coin.update model.dimensions (coin, bins) 
+                         let (updatedCoin, updatedBins) = Coin.updateCoin model.dimensions (coin, bins) 
                          in (updatedCoin :: coinList, updatedBins))
                      ([], model.bins)
                      model.coins
