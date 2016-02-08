@@ -1,6 +1,6 @@
 module Ball where
 
-import Color exposing (Color, black)
+import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (filled, move, Form, circle, polygon)
 import Time exposing (Time)
 import Dict exposing (Dict, get, insert)
@@ -22,8 +22,15 @@ type alias Model =
   , color : Color
   }
 
-init : Int -> Color -> Model
-init indx c = {motion = Galton 0 0 (initialSeed indx), color=c}
+colorCycle : Int -> Color
+colorCycle i =
+    case i % 3 of
+        0 -> red
+        1 -> blue
+        _ -> green
+
+init : Int -> Model
+init indx = {motion = Galton 0 0 (initialSeed indx), color=colorCycle indx}
 
 viewAsForm : (Int, Int) -> Model -> Form
 viewAsForm (_, height) model = 

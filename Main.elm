@@ -2,7 +2,6 @@ import StartApp exposing (..)
 import Window exposing (dimensions)
 import Effects exposing (Effects)
 import Time exposing (Time, every)
-import Color exposing (Color, black, red, blue, green)
 import Graphics.Collage exposing (collage, polygon, filled, move, Form)
 import Ball exposing (init, update, viewAsForm, drawGaltonBox)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
@@ -39,13 +38,6 @@ drop = Signal.map (\t -> Drop (truncate t)) (every 200)
 tick : Signal Action 
 tick  = Signal.map (\t -> Tick) (every 50)
 
-colorCycle : Int -> Color
-colorCycle i =
-    case i % 3 of
-        0 -> red
-        1 -> blue
-        _ -> green
-
 update : Action -> Model -> (Model, Effects Action)
 update action model = 
     case action of
@@ -64,7 +56,7 @@ update action model =
             in ({ model | 
                   dropCount = newDropCount, 
                   started = newDropCount > 0,
-                  balls = Ball.init n (colorCycle n) :: model.balls}, Effects.none)
+                  balls = Ball.init n :: model.balls}, Effects.none)
         else
            (model, Effects.none)
 
