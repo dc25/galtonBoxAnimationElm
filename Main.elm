@@ -12,6 +12,8 @@ import Color exposing (Color, black, red, blue, green)
 import Random exposing (Seed, bool, generate, initialSeed, map)
 
 -- Display related parameters.
+width = 500
+height = 600
 hscale = 10.0
 vscale = hscale * 2
 topMargin = 30
@@ -34,8 +36,8 @@ colorCycle i =
 initCoin : Int -> Coin
 initCoin indx = Coin (Galton 0 0 (initialSeed indx)) (colorCycle indx)
 
-drawCoin : (Int, Int) -> Coin -> Form
-drawCoin (_, height) (Coin motion color) = 
+drawCoin : Coin -> Form
+drawCoin (Coin motion color) = 
   let dropLevel = toFloat (height//2 - topMargin)
       (level, shift, distance) = 
         case motion of
@@ -49,8 +51,8 @@ drawCoin (_, height) (Coin motion color) =
 
   in coinDiameter |> circle |> filled color |> move position 
 
-drawGaltonBox : (Int, Int) -> List Form
-drawGaltonBox (_, height) = 
+drawGaltonBox : List Form
+drawGaltonBox = 
    let levels = [0..levelCount-1]
   
        -- doubles :
@@ -78,7 +80,7 @@ drawGaltonBox (_, height) =
 
        peg = polygon [(0,0), (-4, -8), (4, -8)] |> filled black 
 
-       apex = toFloat ((height//2 ) - topMargin)
+       apex = toFloat (height//2 - topMargin)
 
    in List.map (\(x,y) -> move (hscale*toFloat x,  apex - vscale*toFloat y) peg) galtonCoords
 
@@ -92,8 +94,8 @@ addToBins : Int -> Dict Int Int -> Dict Int Int
 addToBins binNumber bins = 
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
-updateCoin : (Int, Int) -> (Coin, Dict Int Int) -> (Coin, Dict Int Int)
-updateCoin (_, height) (Coin motion color, bins) = 
+updateCoin : (Coin, Dict Int Int) -> (Coin, Dict Int Int)
+updateCoin (Coin motion color, bins) = 
   case motion of
     Galton level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
@@ -119,7 +121,6 @@ updateCoin (_, height) (Coin motion color, bins) =
 type alias Model = 
   { coins : List Coin
   , bins : Dict Int Int
-  , dimensions : (Int,Int)
   , dropCountString : String
   , dropCount : Int
   , started : Bool
@@ -129,7 +130,6 @@ init : Model
 init =
   { coins = []
   , bins = Dict.empty
-  , dimensions = (500,600)
   , dropCountString = ""
   , dropCount = 0
   , started = False
@@ -169,7 +169,7 @@ update action model =
         -- foldr to execute update, append to coins, replace bins
         let (updatedCoins, updatedBins) =
           List.foldr (\coin (coinList, bins) -> 
-                         let (updatedCoin, updatedBins) = updateCoin model.dimensions (coin, bins) 
+                         let (updatedCoin, updatedBins) = updateCoin (coin, bins) 
                          in (updatedCoin :: coinList, updatedBins))
                      ([], model.bins)
                      model.coins
@@ -197,10 +197,8 @@ view address model =
         ]
         [ text "GO!" ]
 
-     , let dim = model.dimensions
-           (width, height) = dim
-           coinForms = (List.map (drawCoin dim) model.coins)
-       in collage width height (coinForms ++ drawGaltonBox dim) |> fromElement 
+     , let coinForms = (List.map (drawCoin) model.coins)
+       in collage width height (coinForms ++ drawGaltonBox) |> fromElement 
     ]
 
 app : StartApp.App Model
