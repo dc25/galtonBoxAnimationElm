@@ -3,7 +3,7 @@ import Effects exposing (Effects)
 import Time exposing (Time, every)
 import Graphics.Collage exposing (collage)
 import Html exposing (Attribute, Html, fromElement, text, div, input, button)
-import Html.Attributes exposing (placeholder, value, style, disabled)
+import Html.Attributes as A exposing (type', min, placeholder, value, style, disabled)
 import Html.Events exposing (on, targetValue, onClick)
 import Dict exposing (Dict)
 import String exposing (toInt)
@@ -14,7 +14,6 @@ import Const
 type alias Model = 
   { coins : List Coin
   , bins : Dict Int Int
-  , countString : String
   , count : Int
   , started : Bool
   }
@@ -23,12 +22,11 @@ init : Model
 init =
   { coins = []
   , bins = Dict.empty
-  , countString = ""
   , count = 0
   , started = False
   }
 
-type Action = Drop Int | Tick | SetCountString String | Go
+type Action = Drop Int | Tick | SetCount String | Go
 
 drop : Signal Action 
 drop = Signal.map (\t -> Drop (round t)) (every 200)
@@ -40,13 +38,10 @@ update : Action -> Model -> (Model, Effects Action)
 update action model = 
   case action of
     Go ->
-      let count = toInt model.countString |> withDefault 0 
-          started = count > 0
-          countString = if (started) then "" else model.countString
-      in ({model | count = count, countString = countString, started = started}, Effects.none)
+      ({model | started = model.count > 0}, Effects.none)
 
-    SetCountString count -> 
-      ({ model | countString = count}, Effects.none)
+    SetCount countString -> 
+      ({ model | count = toInt countString |> withDefault 0 }, Effects.none)
 
     Drop n -> 
       if (model.started && model.count > 0) then
@@ -73,13 +68,13 @@ view address model =
   div []
     [ input
         [ placeholder "How many?"
-        , let showString = if (model.started) -- count down if started
-                           then toString model.count
-                           else model.countString
+        , let showString = if model.count > 0 then model.count |> toString else ""
           in value showString
-        , on "input" targetValue (Signal.message address << SetCountString)
+        , on "input" targetValue (Signal.message address << SetCount)
         , disabled model.started
         , style [ ("height", "20px") ]
+        , type' "number"
+        , A.min "1"
         ]
         []
 
