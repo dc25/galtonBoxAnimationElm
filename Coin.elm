@@ -78,7 +78,7 @@ addToBins binNumber bins =
   insert binNumber (coinsInBin binNumber bins + 1) bins
 
 updateCoin : (Coin, Dict Int Int) -> (Coin, Dict Int Int)
-updateCoin (Coin state color, bins) = 
+updateCoin (Coin state color as coin, bins) = 
   case state of
     InBox level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
@@ -99,7 +99,7 @@ updateCoin (Coin state color, bins) =
          else -- transtion to landed
            (Coin (Landed shift floor) color, bins)
 
-    Landed _ _ -> (Coin state color, bins)
+    Landed _ _ -> (coin, bins) -- unchanged
 
 
 
