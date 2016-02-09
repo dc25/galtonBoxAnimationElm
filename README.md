@@ -10,4 +10,4 @@ http://dc25.github.io/galtonBoxAnimationElm/
 
 The version on the rosettacode.org site:
 http://rosettacode.org/wiki/Galton_box_animation#Elm
-is the version on the rosettacode branch of this git repository.  That code is collected into a single file which is shown on the rosettacode.org site.
+is the version on the rosettacode branch of this git repository.  In that branch the code is collected into a single file.  The resulting program is the rosettacode.org version.
