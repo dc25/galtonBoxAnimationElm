@@ -3,7 +3,7 @@ module Coin where
 import Graphics.Collage exposing (polygon, filled, move, Form, circle)
 import Dict exposing (Dict, get, insert)
 import Color exposing (Color, black, red, blue, green)
-import Random.PCG as Random exposing (Seed, bool, generate, initialSeed, map)
+import Random.PCG as Random exposing (Seed, bool, generate, map)
 import Const
 
 type State = InBox Int Int Seed | Falling Int Float Float Float | Landed Int Float
@@ -17,8 +17,8 @@ colorCycle i =
     1 -> blue
     _ -> green
 
-initCoin : Int -> Coin
-initCoin indx = Coin (InBox 0 0 (initialSeed indx)) (colorCycle indx)
+initCoin : Int -> Seed -> Coin
+initCoin indx seed = Coin (InBox 0 0 seed) (colorCycle indx)
 
 drawCoin : Coin -> Form
 drawCoin (Coin state color) = 

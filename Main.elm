@@ -54,11 +54,11 @@ update action model =
               seed' =  if model.seedInitialized then model.seed else initialSeed t
               (seed'', coinSeed) = split seed'
           in ({ model  
-              | coins = initCoin t :: model.coins
+              | coins = initCoin t coinSeed :: model.coins
               , count = newcount
               , started = newcount > 0
               , seedInitialized = True
-              , seed = seed'}, Effects.none)
+              , seed = seed''}, Effects.none)
       else
          (model, Effects.none)
 
