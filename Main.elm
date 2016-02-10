@@ -9,6 +9,7 @@ import Dict exposing (Dict)
 import String exposing (toInt)
 import Result exposing (withDefault)
 import Coin exposing (Coin, initCoin, updateCoin, drawCoin, drawGaltonBox)
+import Random.PCG as Random exposing (Seed, initialSeed, split)
 import Const
 
 type alias Model = 
@@ -16,6 +17,8 @@ type alias Model =
   , bins : Dict Int Int
   , count : Int
   , started : Bool
+  , seedInitialized : Bool
+  , seed : Seed
   }
 
 init : Model
@@ -24,6 +27,8 @@ init =
   , bins = Dict.empty
   , count = 0
   , started = False
+  , seedInitialized = False
+  , seed = initialSeed 45 -- This will not get used.  Actual seed used is time dependent and set when the first coin drops.
   }
 
 type Action = Drop Int | Tick | SetCount String | Go
@@ -43,13 +48,17 @@ update action model =
     SetCount countString -> 
       ({ model | count = toInt countString |> withDefault 0 }, Effects.none)
 
-    Drop n -> 
+    Drop t -> 
       if (model.started && model.count > 0) then
           let newcount = model.count - 1
-          in ({ model | 
-                count = newcount, 
-                started = newcount > 0,
-                coins = initCoin n :: model.coins}, Effects.none)
+              seed' =  if model.seedInitialized then model.seed else initialSeed t
+              (seed'', coinSeed) = split seed'
+          in ({ model  
+              | coins = initCoin t :: model.coins
+              , count = newcount
+              , started = newcount > 0
+              , seedInitialized = True
+              , seed = seed'}, Effects.none)
       else
          (model, Effects.none)
 
