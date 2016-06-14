@@ -97,7 +97,6 @@ subscriptions model =
     Sub.batch
         [ every (40*millisecond) Tick
         , every (200*millisecond) Drop
-            -- drop = Signal.map (\t -> Drop (round t)) (every 200)
         ]
 
 main =
