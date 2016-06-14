@@ -1,16 +1,16 @@
 import Html.App exposing (program)
 import Time exposing (Time, every, millisecond)
-import Collage exposing (..)
-import Element exposing (..)
+import Collage exposing (collage)
+import Element exposing (toHtml)
 import Html exposing (Attribute, Html, text, div, input, button)
 import Html.Attributes as A exposing (type', min, placeholder, value, style, disabled)
 import Html.Events exposing (onInput, targetValue, onClick)
 import Dict exposing (Dict)
 import String exposing (toInt)
 import Result exposing (withDefault)
-import Coin exposing (Coin, initCoin, updateCoin, drawCoin, drawGaltonBox)
 import Random.Pcg as Random exposing (Seed, initialSeed, independentSeed, step)
 
+import Coin exposing (..)
 import Const
 
 type alias Model = 
