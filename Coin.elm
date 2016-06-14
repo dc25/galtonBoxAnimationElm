@@ -1,9 +1,9 @@
-module Coin where 
+module Coin exposing (..)
 
-import Graphics.Collage exposing (polygon, filled, move, Form, circle)
+import Collage exposing (polygon, filled, move, Form, circle)
 import Dict exposing (Dict, get, insert)
 import Color exposing (Color, black, red, blue, green)
-import Random.PCG as Random exposing (Seed, bool, generate, map)
+import Random.Pcg as Random exposing (Seed, bool, step, map)
 import Const
 
 type State = InBox Int Int Seed | Falling Int Float Float Float | Landed Int Float
@@ -82,7 +82,7 @@ updateCoin (Coin state color as coin, bins) =
   case state of
     InBox level shift seed ->
       let deltaShift = map (\b -> if b then 1 else -1) bool
-          (delta, newSeed) = generate deltaShift seed
+          (delta, newSeed) = step deltaShift seed
           newShift = shift+delta
           newLevel = (level)+1
       in if (newLevel < Const.levelCount) then

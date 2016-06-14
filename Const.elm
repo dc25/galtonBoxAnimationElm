@@ -1,4 +1,4 @@
-module Const where
+module Const exposing (..) 
 
 width = 500
 height = 600
